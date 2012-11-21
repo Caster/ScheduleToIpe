@@ -1,7 +1,10 @@
+package model;
 
-package Model
-
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The Schedule object.
@@ -25,8 +28,10 @@ public class Schedule {
 	 */
 	Schedule(List<Task> schedule){
 		// using unmodifiables to guarantee immutability.
-		taskSchedule = Collections.unmodifiableList(new ArrayList(schedule));
-		tasks = new Collections.unmodifiableSet(new HashSet<Task>(schedule));
+		taskSchedule = Collections.unmodifiableList(new ArrayList<Task>(schedule));
+		Set<Task> tasksWithNull = new HashSet<Task>(schedule);
+		tasksWithNull.remove(null);
+		tasks = Collections.unmodifiableSet(tasksWithNull);
 	}
 	
 	/**
