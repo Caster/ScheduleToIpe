@@ -1,8 +1,5 @@
 package output;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -30,13 +27,7 @@ public class OutputIpe {
 	}
 	
 	private void outputFromFile(String path) {
-		InputStream is;
-		try {
-			is = new FileInputStream(new File(path));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return;
-		}
+		InputStream is = getClass().getResourceAsStream(path);
 		// Read header from file and output it to the stream
 		byte[] buffer = new byte[4096]; // tweaking this number may increase performance  
 		int len;  
@@ -54,11 +45,11 @@ public class OutputIpe {
 	}
 	
 	private void outputFooter() {
-		outputFromFile("res/ipe_footer.txt");
+		outputFromFile("/ipe_footer.txt");
 	}
 	
 	private void outputHeader() {
-		outputFromFile("res/ipe_header.txt");
+		outputFromFile("/ipe_header.txt");
 	}
 	
 }
