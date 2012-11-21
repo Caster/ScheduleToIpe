@@ -2,7 +2,6 @@ package model;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -26,14 +25,13 @@ public class Schedule {
 	 * The length of {@code schedule} indicates the LCM for this Schedule.
 	 * 
 	 * @param schedule the schedule for the Tasks.
+	 * @param tasks the Tasks this schedule contains (can contain more then schedule).
 	 * @param isFeasible if this schedule is a schedule without deadline miss
 	 */
-	Schedule(List<Task> schedule, boolean isFeasible){
+	Schedule(List<Task> schedule, Set<Task> tasks, boolean isFeasible){
 		// using unmodifiables to guarantee immutability.
 		taskSchedule = Collections.unmodifiableList(new ArrayList<Task>(schedule));
-		Set<Task> tasksWithNull = new HashSet<Task>(schedule);
-		tasksWithNull.remove(null);
-		tasks = Collections.unmodifiableSet(tasksWithNull);
+		this.tasks = Collections.unmodifiableSet(tasks);
 		this.isFeasible = isFeasible;
 	}
 	
@@ -83,4 +81,11 @@ public class Schedule {
 		return isFeasible;
 	}
 
+	@Override
+	public String toString() {
+		return "Schedule [taskSchedule=" + taskSchedule + ", isFeasible="
+				+ isFeasible + "]";
+	}
+
+	
 }

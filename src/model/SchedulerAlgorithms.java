@@ -11,31 +11,35 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 /**
- * The schedular algorithms supported by this application.
+ * The scheduler algorithms supported by this application.
  * 
  * @author Barnabbas
  */
 public final class SchedulerAlgorithms {
 
 	/**
-	 * A Rate Monotonic schedular; a static priority schedular that uses the period for priority
+	 * A Rate Monotonic scheduler; a static priority scheduler that uses the period for priority
 	 */
-	public final SchedulerAlgorithm RATE_MONOTONIC = new StaticPriorityScheduler(){
+	public final static SchedulerAlgorithm RATE_MONOTONIC = new StaticPriorityScheduler(){
+		
+		@Override
 		protected int getPriority(Task task){
 			return -task.getPeriod();
 		}
 	};
 	
 	/**
-	 * A Deadline Monotonic schedular; a static priority schedular that uses the deadline for priority
+	 * A Deadline Monotonic scheduler; a static priority scheduler that uses the deadline for priority
 	 */
-	public final SchedulerAlgorithm DEADLINE_MONOTONIC = new StaticPriorityScheduler(){
+	public final static SchedulerAlgorithm DEADLINE_MONOTONIC = new StaticPriorityScheduler(){
+		
+		@Override
 		protected int getPriority(Task task){
 			return -task.getDeadline();
 		}
 	};
 	
-	public final SchedulerAlgorithm EARLIEST_DEADLINE_FIRST = new DynamicPrioritySchedular() {
+	public final static SchedulerAlgorithm EARLIEST_DEADLINE_FIRST = new DynamicPriorityScheduler() {
 		
 		@Override
 		protected int getPriority(Task task, int time) {
@@ -51,7 +55,7 @@ public final class SchedulerAlgorithms {
 	/**
 	 * An abstract class used to create Dynamic Priority schedulers.
 	 */
-	private static abstract class DynamicPrioritySchedular implements SchedulerAlgorithm {
+	private static abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 		/**
 		 * Assigns a priority to a Task at a given time.
 		 * A higher priority will be scheduled first.
@@ -101,8 +105,11 @@ public final class SchedulerAlgorithms {
 					}
 				}
 				
+				// removing the time of the Task
+				tasktimeLeft.remove(nextTask);
+				
 				// setting the task into the schedule (or determine deadline miss)
-				if (nextTask.getDeadline() >= t){ // deadline missed
+				if (nextTask != null && nextTask.getDeadline() <= t % nextTask.getPeriod()){ // deadline missed
 					deadlineMissed = true;
 				} else { // can schedule this
 					schedule.add(nextTask);
@@ -110,7 +117,7 @@ public final class SchedulerAlgorithms {
 				
 			}
 			
-			return new Schedule(schedule, !deadlineMissed);
+			return new Schedule(schedule, tasks, !deadlineMissed);
 		}
 		
 	}
@@ -146,7 +153,7 @@ public final class SchedulerAlgorithms {
 			int lcm = lcm(tasks);
 			
 			// the final schedule
-			List<Task> schedule = new ArrayList<Task>(lcm);
+			List<Task> schedule = new ArrayList<Task>();
 			
 			boolean deadlineMissed = false;
 			
@@ -164,15 +171,15 @@ public final class SchedulerAlgorithms {
 				// apparantly the queue returns null when empty, so should work...
 				Task task = queue.poll();
 				
-				if (task.getDeadline() >= t){ // deadline missed
+				if (task != null && task.getDeadline() <= t % task.getPeriod()){ // deadline missed
 					deadlineMissed = true;
 				} else { // can schedule this
-					schedule.add(task);
+					schedule.add(t, task);
 				}
 				
 			}
 			
-			return new Schedule(schedule, !deadlineMissed);
+			return new Schedule(schedule, tasks, !deadlineMissed);
 		}
 		
 
@@ -191,7 +198,7 @@ public final class SchedulerAlgorithms {
 
 		public int compare(Task t1, Task t2) {
 			// reversed, because a higher priority needs to be at the front.
-			return priorities.get(t1) - priorities.get(t2);
+			return priorities.get(t2) - priorities.get(t1);
 		}
 	}
 	

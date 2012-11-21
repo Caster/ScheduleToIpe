@@ -3,7 +3,7 @@ package model;
 import java.util.Set;
 
 /**
- * A SchedularAlgorithm is used to make decisions about what Task should been scheduled when.
+ * A SchedulerAlgorithm is used to make decisions about what Task should been scheduled when.
  * @author Barnabbas
  */
 public interface SchedulerAlgorithm {
