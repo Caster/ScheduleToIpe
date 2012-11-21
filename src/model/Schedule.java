@@ -16,6 +16,7 @@ public class Schedule {
 	
 	private final Set<Task> tasks;
 	private final List<Task> taskSchedule;
+	private final boolean isFeasible;
 	
 	/**
 	 * Constructs a new Schedule.<br>
@@ -25,13 +26,15 @@ public class Schedule {
 	 * The length of {@code schedule} indicates the LCM for this Schedule.
 	 * 
 	 * @param schedule the schedule for the Tasks.
+	 * @param isFeasible if this schedule is a schedule without deadline miss
 	 */
-	Schedule(List<Task> schedule){
+	Schedule(List<Task> schedule, boolean isFeasible){
 		// using unmodifiables to guarantee immutability.
 		taskSchedule = Collections.unmodifiableList(new ArrayList<Task>(schedule));
 		Set<Task> tasksWithNull = new HashSet<Task>(schedule);
 		tasksWithNull.remove(null);
 		tasks = Collections.unmodifiableSet(tasksWithNull);
+		this.isFeasible = isFeasible;
 	}
 	
 	/**
@@ -70,6 +73,14 @@ public class Schedule {
 	public int getLcm(){
 		// this assumes that the given taskSchedule is valid
 		return taskSchedule.size();
+	}
+	
+	/**
+	 * Determines whether this Schedule is a valid Schedule. A Schedule is valid when there are no deadline misses.
+	 * @return if this Schedule is feasible.
+	 */
+	public boolean isFeasible(){
+		return isFeasible;
 	}
 
 }
