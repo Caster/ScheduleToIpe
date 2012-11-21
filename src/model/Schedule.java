@@ -1,5 +1,10 @@
+package model;
 
-package Model
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The Schedule object.
@@ -9,21 +14,55 @@ package Model
  */
 public class Schedule {
 	
+	private final Set<Task> tasks;
+	private final List<Task> taskSchedule;
+	private final boolean isFeasible;
+	
+	/**
+	 * Constructs a new Schedule.<br>
+	 * The schedule will consists of the Tasks in {@code schedule} such that 
+	 * {@code getTask(i) == schedule.get(i)}.
+	 * When there is no Task at a certain moment, then {@code null} has to be placed there.
+	 * The length of {@code schedule} indicates the LCM for this Schedule.
+	 * 
+	 * @param schedule the schedule for the Tasks.
+	 * @param isFeasible if this schedule is a schedule without deadline miss
+	 */
+	Schedule(List<Task> schedule, boolean isFeasible){
+		// using unmodifiables to guarantee immutability.
+		taskSchedule = Collections.unmodifiableList(new ArrayList<Task>(schedule));
+		Set<Task> tasksWithNull = new HashSet<Task>(schedule);
+		tasksWithNull.remove(null);
+		tasks = Collections.unmodifiableSet(tasksWithNull);
+		this.isFeasible = isFeasible;
+	}
+	
 	/**
 	 * Gets the tasks of this Schedule.
 	 * @return a List containing the tasks of this Schedule.
 	 */
-	public List<Task> getTasks(){
-		return null;
+	public Set<Task> getTasks(){
+		return tasks;
 	}
 	
 	/**
 	 * The task that runs immediatly after the given time.
+	 * Returns {@code null} when no Task will run at that moment. <br>
+	 * {@code time} must be smaller then the LCM of this Schedule.
+	 * 
+	 * 
 	 * @param time the timestamp of the moment you want the task of.
-	 * @return the Task that runs immediatly after the given timestamp.
+	 * @return the Task that runs immediatly after the given timestamp or 
+	 * {@code null} if there is no such Task.
+	 * 
+	 * @throws IllegalArgumentException if {@code time} is larger then the LCM
 	 */
-	public Task getTaskAt(int time){
-		return null;
+	public Task getTaskAt(int time) throws IllegalArgumentException{
+		if (time >= taskSchedule.size()){
+			throw new IllegalArgumentException("The given time is not within lcm, time is " + time);
+		}
+		
+		return taskSchedule.get(time);
 	}
 	
 	/**
@@ -31,8 +70,17 @@ public class Schedule {
 	 * This is the least common multiplier of the periods of the Tasks.
 	 * @return Length of a cycle of this Schedule.
 	 */
-	public int lcm(){
-		return null;
+	public int getLcm(){
+		// this assumes that the given taskSchedule is valid
+		return taskSchedule.size();
+	}
+	
+	/**
+	 * Determines whether this Schedule is a valid Schedule. A Schedule is valid when there are no deadline misses.
+	 * @return if this Schedule is feasible.
+	 */
+	public boolean isFeasible(){
+		return isFeasible;
 	}
 
 }
