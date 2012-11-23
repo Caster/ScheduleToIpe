@@ -7,6 +7,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import java.util.Set;
 
 import model.Schedule;
@@ -57,7 +60,7 @@ public class OutputIpe {
 	 *  This is the Y-coordinate of the upper-left corner of the drawing. */
 	public static final int OFFSET_Y = 832 - 5 * GRID_SIZE;
 	/** Padding, used in drawing squares. */
-	public static final double PADDING = 0.1;
+	public static final double PADDING = 0.5;
 	/** Space around text. */
 	public static final int TEXT_MARGIN = GRID_SIZE / 5;
 	
@@ -88,7 +91,7 @@ public class OutputIpe {
 	 */
 	public void outputIpeFile(Schedule schedule) {
 		Set<Task> tasks = schedule.getTasks();
-		Task t;
+		Task curTask, prevTask = null;
 		int i, j;
 		
 		// Ipe header
@@ -113,15 +116,20 @@ public class OutputIpe {
 			writeString("$" + i + "$",
 					OFFSET_X + GRID_SIZE * i, OFFSET_Y - GRID_SIZE * tasks.size() - TEXT_MARGIN,
 					"center", "top");
-			t = schedule.getTaskAt(i);
-			if (t == null)  continue;
+			curTask = schedule.getTaskAt(i);
+			if (curTask == null)  continue;
 			j = 0;
 			for (Task tt : tasks) {
-				if (tt.equals(t))  break;
+				if (tt.equals(curTask))  break;
 				j++;
 			}
-			writeSquareFilled(OFFSET_X + GRID_SIZE * i + PADDING, OFFSET_Y + GRID_SIZE * (j - tasks.size()) + PADDING,
-					GRID_SIZE - 2 * PADDING, GRID_SIZE - 2 * PADDING, IPE_COLORS[j % IPE_COLORS.length]);
+			writeSquareFilled(
+					OFFSET_X + GRID_SIZE * i + (curTask.equals(prevTask) ? -PADDING : PADDING),
+					OFFSET_Y + GRID_SIZE * (j - tasks.size()) + PADDING,
+					GRID_SIZE - (curTask.equals(prevTask) ? 0 : 2 * PADDING), GRID_SIZE - 2 * PADDING,
+					IPE_COLORS[j % IPE_COLORS.length]
+				);
+			prevTask = curTask;
 		}
 		// write X-axis scale
 		writeString("$" + i + "$", OFFSET_X + GRID_SIZE * i, OFFSET_Y - GRID_SIZE * tasks.size() - GRID_SIZE / 5, "center", "top");
@@ -182,7 +190,7 @@ public class OutputIpe {
 	
 	@SuppressWarnings("boxing")
 	private void writeSquare(double x, double y, double width, double height) {
-		String square = String.format(SQUARE, x, y, x + width, y, x + width, y + height, x, y + height);
+		String square = String.format(Locale.US, SQUARE, x, y, x + width, y, x + width, y + height, x, y + height);
 		try {
 			output.write(square.getBytes());
 		} catch (IOException e) {
@@ -192,8 +200,7 @@ public class OutputIpe {
 	
 	@SuppressWarnings("boxing")
 	private void writeSquareFilled(double x, double y, double width, double height, String color) {
-		System.out.println(x);
-		String square = String.format(SQUARE_FILLED, color, color, x, y, x + width, y, x + width, y + height, x, y + height);
+		String square = String.format(Locale.US, SQUARE_FILLED, color, color, x, y, x + width, y, x + width, y + height, x, y + height);
 		try {
 			output.write(square.getBytes());
 		} catch (IOException e) {
@@ -209,7 +216,7 @@ public class OutputIpe {
 	
 	@SuppressWarnings("boxing")
 	private void writeLine(double x1, double y1, double x2, double y2) {
-		String line = String.format(LINE, x1, y1, x2, y2);
+		String line = String.format(Locale.US, LINE, x1, y1, x2, y2);
 		try {
 			output.write(line.getBytes());
 		} catch (IOException e) {
@@ -224,7 +231,7 @@ public class OutputIpe {
 	
 	@SuppressWarnings("boxing")
 	private void writeString(String text, double x, double y, String halign, String valign) {
-		String string = String.format(STRING, x, y, halign, valign, text);
+		String string = String.format(Locale.US, STRING, x, y, halign, valign, text);
 		try {
 			output.write(string.getBytes());
 		} catch (IOException e) {

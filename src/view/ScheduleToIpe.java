@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -13,6 +14,7 @@ import java.util.Set;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -43,10 +45,15 @@ public class ScheduleToIpe extends JFrame {
 	private static final String NO_TASKS_TEXT = "No tasks created yet.";
 	/** Text to display in info pane when no tasks are available yet. */
 	private static final String NO_TASKS_INFO_TEXT = "Here, information about created tasks will appear. " +
-			"You should first create a task to see something useful here.";
+			"You should first create a task and select it on the left.\n\n" +
+			"When you have selected a task, you will be able to change its properties here.";
 	
-	/** Pane with information about selected task. */
-	private JTextPane taskInfoPane;
+	// For CardLayout
+	private static final String CARD_NO_TASK_PANEL = "NoTasksCard";
+	private static final String CARD_TASK_INFO_PANEL = "TaskInfoCard";
+	
+	/** Panel that contains both a text about no tasks being created and a panel with information. */
+	private JPanel rightPanel;
 	/** List with created tasks. */
 	private JList<String> taskList;
 	/** Model for list with created tasks. */
@@ -57,10 +64,9 @@ public class ScheduleToIpe extends JFrame {
 		public void valueChanged(ListSelectionEvent e) {
 			if (createdTasks.size() > 0 && taskListModel.size() > 0 && taskList.getSelectedIndex() >= 0) {
 				showInfoAbout(taskListModel.getElementAt(taskList.getSelectedIndex()));
-				taskInfoPane.repaint();
 				removeTaskButton.setEnabled(true);
 			} else {
-				taskInfoPane.setText(NO_TASKS_INFO_TEXT);
+				((CardLayout) rightPanel.getLayout()).show(rightPanel, CARD_NO_TASK_PANEL);
 			}
 		}
 	};
@@ -139,6 +145,14 @@ public class ScheduleToIpe extends JFrame {
 			outputIpe.outputIpeFile(SchedulerAlgorithms.RATE_MONOTONIC.createSchedule(createdTasks));
 		}
 	};
+	/** Input with name of task that is currenlty edited. */
+	private JTextPane inputTaskName;
+	/** Input with period of task that is currenlty edited. */
+	private JTextPane inputTaskPeriod;
+	/** Input with deadline of task that is currenlty edited. */
+	private JTextPane inputTaskDeadline;
+	/** Input with execution time of task that is currenlty edited. */
+	private JTextPane inputTaskExecutionTime;
 	
 	/** Tasks created by the user. */
 	Set<Task> createdTasks;
@@ -204,10 +218,31 @@ public class ScheduleToIpe extends JFrame {
 		add(leftPanel);
 		
 		// Rightpanel
-		taskInfoPane = new JTextPane();
-		taskInfoPane.setEditable(false);
-		taskInfoPane.setText(NO_TASKS_INFO_TEXT);
-		add(taskInfoPane);
+		rightPanel = new JPanel(new CardLayout());
+		JPanel noTasksPanel = new JPanel(new BorderLayout());
+		JTextPane noTasksPane = new JTextPane();
+		noTasksPane.setEditable(false);
+		noTasksPane.setText(NO_TASKS_INFO_TEXT);
+		noTasksPanel.add(noTasksPane, BorderLayout.NORTH);
+		rightPanel.add(noTasksPanel, CARD_NO_TASK_PANEL);
+		JPanel taskInfoPanel = new JPanel(new BorderLayout());
+		JPanel formPanel = new JPanel(new GridLayout(8, 1));
+		formPanel.add(new JLabel("The name of the task:"));
+		inputTaskName = new JTextPane();
+		formPanel.add(inputTaskName);
+		formPanel.add(new JLabel("The period (T) of the task:"));
+		inputTaskPeriod = new JTextPane();
+		formPanel.add(inputTaskPeriod);
+		formPanel.add(new JLabel("The deadline (D) of the task:"));
+		inputTaskDeadline = new JTextPane();
+		formPanel.add(inputTaskDeadline);
+		formPanel.add(new JLabel("The execution time (C) of the task:"));
+		inputTaskExecutionTime = new JTextPane();
+		formPanel.add(inputTaskExecutionTime);
+		taskInfoPanel.add(formPanel, BorderLayout.NORTH);
+		rightPanel.add(taskInfoPanel, CARD_TASK_INFO_PANEL);
+		((CardLayout) rightPanel.getLayout()).show(rightPanel, CARD_NO_TASK_PANEL);
+		add(rightPanel);
 	}
 	
 	/**
@@ -216,7 +251,19 @@ public class ScheduleToIpe extends JFrame {
 	 * @param taskName Name of the task.
 	 */
 	private void showInfoAbout(String taskName) {
-		taskInfoPane.setText(taskName);
-		// TODO: Use CardLayout in right panel and use input fields to let the user change name, period, execution time,...
+		((CardLayout) rightPanel.getLayout()).show(rightPanel, CARD_TASK_INFO_PANEL);
+		Task t = null;
+		for (Task tt : createdTasks) {
+			if (tt.getName().equals(taskName)) {
+				t = tt;
+				break;
+			}
+		}
+		if (t == null)  return;
+		// Set values in inputs
+		inputTaskName.setText(t.getName());
+		inputTaskPeriod.setText(t.getPeriod() + "");
+		inputTaskDeadline.setText(t.getDeadline() + "");
+		inputTaskExecutionTime.setText(t.getExecutionTime() + "");
 	}
 }
