@@ -8,9 +8,9 @@ package model;
 public class Task {
 	
 	private String name;
-	private int period;
-	private int deadline;
-	private int executionTime;
+	private double period;
+	private double deadline;
+	private double executionTime;
 	
 	/**
 	 * Constructs a new Task.
@@ -20,7 +20,7 @@ public class Task {
 	 * @param tDeadline The relative deadline of this Task
 	 * @param tExecutionTime the execution time of this Task
 	 */
-	public Task(String tName, int tPeriod, int tDeadline, int tExecutionTime){
+	public Task(String tName, double tPeriod, double tDeadline, double tExecutionTime){
 		this.name = tName;
 		this.period = tPeriod;
 		this.deadline = tDeadline;
@@ -49,7 +49,7 @@ public class Task {
 	 * The period of this Task.
 	 * @return The period of this Task.
 	 */
-	public int getPeriod(){
+	public double getPeriod(){
 		return period;
 	}
 	
@@ -66,7 +66,7 @@ public class Task {
 	 * The relative deadline of this Task. 
 	 * @return the relative deadline of this Task.
 	 */
-	public int getDeadline(){
+	public double getDeadline(){
 		return deadline;
 	}
 	
@@ -83,7 +83,7 @@ public class Task {
 	 * The execution time of this Task. That is the running time of each Task instance.
 	 * @return the execution time of this Task.
 	 */
-	public int getExecutionTime(){
+	public double getExecutionTime(){
 		return executionTime;
 	}
 	
@@ -105,13 +105,16 @@ public class Task {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + deadline;
-		result = prime * result + executionTime;
+		long temp;
+		temp = Double.doubleToLongBits(deadline);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(executionTime);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + period;
+		temp = Double.doubleToLongBits(period);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -122,18 +125,20 @@ public class Task {
 		if (getClass() != obj.getClass())
 			return false;
 		Task other = (Task) obj;
-		if (deadline != other.deadline)
+		if (Double.doubleToLongBits(deadline) != Double
+				.doubleToLongBits(other.deadline))
 			return false;
-		if (executionTime != other.executionTime)
+		if (Double.doubleToLongBits(executionTime) != Double
+				.doubleToLongBits(other.executionTime))
 			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (period != other.period)
+		if (Double.doubleToLongBits(period) != Double
+				.doubleToLongBits(other.period))
 			return false;
 		return true;
 	}
-
 }

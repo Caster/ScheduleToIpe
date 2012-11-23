@@ -24,7 +24,7 @@ public final class SchedulerAlgorithms {
 	public final static SchedulerAlgorithm RATE_MONOTONIC = new StaticPriorityScheduler() {
 
 		@Override
-		protected int getPriority(Task task) {
+		protected double getPriority(Task task) {
 			return -task.getPeriod();
 		}
 	};
@@ -36,16 +36,20 @@ public final class SchedulerAlgorithms {
 	public final static SchedulerAlgorithm DEADLINE_MONOTONIC = new StaticPriorityScheduler() {
 
 		@Override
-		protected int getPriority(Task task) {
+		protected double getPriority(Task task) {
 			return -task.getDeadline();
 		}
 	};
 
+	/**
+	 * An Earliest Deadline First scheduler; a dynamic priority scheduler that always
+	 * schedules the task with the earliest deadline.
+	 */
 	public final static SchedulerAlgorithm EARLIEST_DEADLINE_FIRST = new DynamicPriorityScheduler() {
 
 		@Override
-		protected int getPriority(Task task, int time) {
-			int relativeTime = time % task.getPeriod();
+		protected double getPriority(Task task, int time) {
+			double relativeTime = time % task.getPeriod();
 			return -(task.getDeadline() - relativeTime);
 		}
 	};
@@ -69,7 +73,7 @@ public final class SchedulerAlgorithms {
 		 *            the current timestamp
 		 * @return a priority for Task {@code task}.
 		 */
-		protected abstract int getPriority(Task task, int time);
+		protected abstract double getPriority(Task task, int time);
 
 		public Schedule createSchedule(Set<Task> tasks) {
 
@@ -109,11 +113,11 @@ public final class SchedulerAlgorithms {
 				// the task with the highest priority
 				Task nextTask = null;
 				// the priority of nextTask
-				int nextPriority = Integer.MIN_VALUE;
+				double nextPriority = Double.MIN_VALUE;
 
 				// getting task with highest priority
 				for (Task task : tasktimeLeft) {
-					int priority = getPriority(task, t);
+					double priority = getPriority(task, t);
 					if (priority > nextPriority) {
 						nextTask = task;
 						nextPriority = priority;
@@ -157,12 +161,13 @@ public final class SchedulerAlgorithms {
 		 *            the Task to assign a priority.
 		 * @return a priority for Task {@code task}.
 		 */
-		protected abstract int getPriority(Task task);
+		protected abstract double getPriority(Task task);
 
+		@SuppressWarnings("boxing")
 		public Schedule createSchedule(Set<Task> tasks) {
 
 			// getting the comperator
-			Map<Task, Integer> priorities = new HashMap<Task, Integer>();
+			Map<Task, Double> priorities = new HashMap<Task, Double>();
 			for (Task task : tasks) {
 				priorities.put(task, getPriority(task));
 			}
@@ -225,15 +230,16 @@ public final class SchedulerAlgorithms {
 	 */
 	private static class TaskComparator implements Comparator<Task> {
 
-		private Map<Task, Integer> priorities;
+		private Map<Task, Double> priorities;
 
-		TaskComparator(Map<Task, Integer> priorities) {
-			this.priorities = priorities;
+		TaskComparator(Map<Task, Double> tPriorities) {
+			this.priorities = tPriorities;
 		}
 
+		@SuppressWarnings("boxing")
 		public int compare(Task t1, Task t2) {
 			// reversed, because a higher priority needs to be at the front.
-			return priorities.get(t2) - priorities.get(t1);
+			return (int) Math.signum(priorities.get(t2) - priorities.get(t1));
 		}
 	}
 
@@ -269,7 +275,7 @@ public final class SchedulerAlgorithms {
 		int[] periods = new int[tasks.size()];
 		int i = 0;
 		for (Task task : tasks) {
-			periods[i] = task.getPeriod();
+			periods[i] = (int) Math.ceil(task.getPeriod());
 			i++;
 		}
 

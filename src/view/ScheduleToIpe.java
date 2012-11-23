@@ -99,6 +99,7 @@ public class ScheduleToIpe extends JFrame {
 			createdTasks.add(new Task(name, 5, 5, 2));
 			exportScheduleButton.setEnabled(true);
 			// Update list
+			taskList.setSelectedIndex(taskListModel.getSize() - 1);
 			taskList.repaint();
 		}
 	};

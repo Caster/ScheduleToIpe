@@ -24,15 +24,15 @@ public class Schedule {
 	 * When there is no Task at a certain moment, then {@code null} has to be placed there.
 	 * The length of {@code schedule} indicates the LCM for this Schedule.
 	 * 
-	 * @param schedule the schedule for the Tasks.
-	 * @param tasks the Tasks this schedule contains (can contain more then schedule).
-	 * @param isFeasible if this schedule is a schedule without deadline miss
+	 * @param sSchedule the schedule for the Tasks.
+	 * @param sTasks the Tasks this schedule contains (can contain more then schedule).
+	 * @param sIsFeasible if this schedule is a schedule without deadline miss
 	 */
-	Schedule(List<Task> schedule, Set<Task> tasks, boolean isFeasible){
+	Schedule(List<Task> sSchedule, Set<Task> sTasks, boolean sIsFeasible){
 		// using unmodifiables to guarantee immutability.
-		taskSchedule = Collections.unmodifiableList(new ArrayList<Task>(schedule));
-		this.tasks = Collections.unmodifiableSet(tasks);
-		this.isFeasible = isFeasible;
+		taskSchedule = Collections.unmodifiableList(new ArrayList<Task>(sSchedule));
+		this.tasks = Collections.unmodifiableSet(sTasks);
+		this.isFeasible = sIsFeasible;
 	}
 	
 	/**
