@@ -7,24 +7,24 @@ package model;
  */
 public class Task {
 	
-	private final String name;
-	private final int period;
-	private final int deadline;
-	private final int executionTime;
+	private String name;
+	private int period;
+	private int deadline;
+	private int executionTime;
 	
 	/**
 	 * Constructs a new Task.
 	 * 
-	 * @param name The name of this Task
-	 * @param period The period of this Task
-	 * @param deadline The relative deadline of this Task
-	 * @param executionTime the execution time of this Task
+	 * @param tName The name of this Task
+	 * @param tPeriod The period of this Task
+	 * @param tDeadline The relative deadline of this Task
+	 * @param tExecutionTime the execution time of this Task
 	 */
-	public Task(String name, int period, int deadline, int executionTime){
-		this.name = name;
-		this.period = period;
-		this.deadline = deadline;
-		this.executionTime = executionTime;
+	public Task(String tName, int tPeriod, int tDeadline, int tExecutionTime){
+		this.name = tName;
+		this.period = tPeriod;
+		this.deadline = tDeadline;
+		this.executionTime = tExecutionTime;
 	}
 	
 	
@@ -37,11 +37,29 @@ public class Task {
 	}
 	
 	/**
+	 * Change the name of this task.
+	 * 
+	 * @param newName New name for this task.
+	 */
+	public void setName(String newName) {
+		this.name = newName;
+	}
+	
+	/**
 	 * The period of this Task.
 	 * @return The period of this Task.
 	 */
 	public int getPeriod(){
 		return period;
+	}
+	
+	/**
+	 * Change the period of this task.
+	 * 
+	 * @param newPeriod New period for this task.
+	 */
+	public void setPeriod(int newPeriod) {
+		this.period = newPeriod;
 	}
 	
 	/**
@@ -53,11 +71,29 @@ public class Task {
 	}
 	
 	/**
+	 * Change the deadline of this task.
+	 * 
+	 * @param newDeadline New deadline for this task.
+	 */
+	public void setDeadline(int newDeadline) {
+		this.deadline = newDeadline;
+	}
+	
+	/**
 	 * The execution time of this Task. That is the running time of each Task instance.
 	 * @return the execution time of this Task.
 	 */
 	public int getExecutionTime(){
 		return executionTime;
+	}
+	
+	/**
+	 * Change the execution time of this task.
+	 * 
+	 * @param newExecutionTime New execution time for this task.
+	 */
+	public void setExecutionTime(int newExecutionTime) {
+		this.executionTime = newExecutionTime;
 	}
 	
 	@Override

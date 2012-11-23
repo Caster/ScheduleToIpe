@@ -226,7 +226,7 @@ public class ScheduleToIpe extends JFrame {
 		noTasksPanel.add(noTasksPane, BorderLayout.NORTH);
 		rightPanel.add(noTasksPanel, CARD_NO_TASK_PANEL);
 		JPanel taskInfoPanel = new JPanel(new BorderLayout());
-		JPanel formPanel = new JPanel(new GridLayout(8, 1));
+		JPanel formPanel = new JPanel(new GridLayout(9, 1));
 		formPanel.add(new JLabel("The name of the task:"));
 		inputTaskName = new JTextPane();
 		formPanel.add(inputTaskName);
@@ -239,6 +239,35 @@ public class ScheduleToIpe extends JFrame {
 		formPanel.add(new JLabel("The execution time (C) of the task:"));
 		inputTaskExecutionTime = new JTextPane();
 		formPanel.add(inputTaskExecutionTime);
+		JPanel saveButtonPanel = new JPanel(new BorderLayout());
+		JButton saveButton = new JButton("Save");
+		saveButton.addActionListener(new ActionListener() {
+			@SuppressWarnings("boxing")
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Find "current" task
+				Task t = null;
+				boolean canChangeName = true;
+				for (Task tt : createdTasks) {
+					if (tt.getName().equals(taskListModel.elementAt(taskList.getSelectedIndex()))) {
+						t = tt;
+					} else if (tt.getName().equals(inputTaskName.getText())) {
+						canChangeName = false;
+					}
+				}
+				if (t == null)  return;
+				if (canChangeName) {
+					t.setName(inputTaskName.getText());
+				} else {
+					inputTaskName.setText(t.getName());
+				}
+				t.setPeriod(Integer.valueOf(inputTaskPeriod.getText()));
+				t.setDeadline(Integer.valueOf(inputTaskDeadline.getText()));
+				t.setExecutionTime(Integer.valueOf(inputTaskExecutionTime.getText()));
+			}
+		});
+		saveButtonPanel.add(saveButton, BorderLayout.EAST);
+		formPanel.add(saveButtonPanel);
 		taskInfoPanel.add(formPanel, BorderLayout.NORTH);
 		rightPanel.add(taskInfoPanel, CARD_TASK_INFO_PANEL);
 		((CardLayout) rightPanel.getLayout()).show(rightPanel, CARD_NO_TASK_PANEL);
@@ -265,5 +294,6 @@ public class ScheduleToIpe extends JFrame {
 		inputTaskPeriod.setText(t.getPeriod() + "");
 		inputTaskDeadline.setText(t.getDeadline() + "");
 		inputTaskExecutionTime.setText(t.getExecutionTime() + "");
+		rightPanel.repaint();
 	}
 }
