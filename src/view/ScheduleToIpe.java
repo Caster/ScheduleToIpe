@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,7 +22,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import model.SchedulerAlgorithms;
 import model.Task;
+import output.OutputIpe;
 
 /**
  * ScheduleToIpe is a GUI program that allows a user to create
@@ -52,7 +56,7 @@ public class ScheduleToIpe extends JFrame {
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
 			if (createdTasks.size() > 0 && taskListModel.size() > 0 && taskList.getSelectedIndex() >= 0) {
-				taskInfoPane.setText(taskListModel.getElementAt(taskList.getSelectedIndex()));
+				showInfoAbout(taskListModel.getElementAt(taskList.getSelectedIndex()));
 				taskInfoPane.repaint();
 				removeTaskButton.setEnabled(true);
 			} else {
@@ -87,6 +91,7 @@ public class ScheduleToIpe extends JFrame {
 			// Add task
 			taskListModel.addElement(name);
 			createdTasks.add(new Task(name, 5, 5, 2));
+			exportScheduleButton.setEnabled(true);
 			// Update list
 			taskList.repaint();
 		}
@@ -111,6 +116,7 @@ public class ScheduleToIpe extends JFrame {
 			taskListModel.remove(taskList.getSelectedIndex());
 			if (taskListModel.size() == 0) {
 				taskListModel.addElement(NO_TASKS_TEXT);
+				exportScheduleButton.setEnabled(false);
 			}
 			// Select next task in list, or disable remove task button as no task can be removed
 			if (createdTasks.size() > 0) {
@@ -124,9 +130,20 @@ public class ScheduleToIpe extends JFrame {
 			}
 		}
 	};
+	/** "Export schedule" button. */
+	private JButton exportScheduleButton;
+	/** Listener for "Export schedule" button. */
+	ActionListener exportScheduleButtonListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			outputIpe.outputIpeFile(SchedulerAlgorithms.RATE_MONOTONIC.createSchedule(createdTasks));
+		}
+	};
 	
 	/** Tasks created by the user. */
 	Set<Task> createdTasks;
+	/** Object used to output an Ipe-readable file. */
+	OutputIpe outputIpe;
 
 	/**
 	 * Start the GUI program.
@@ -149,6 +166,11 @@ public class ScheduleToIpe extends JFrame {
 	 */
 	public ScheduleToIpe() {
 		createdTasks = new HashSet<Task>();
+		try {
+			outputIpe = new OutputIpe(new File(System.getProperty("user.home") + "/out.ipe"));
+		} catch (FileNotFoundException e) {
+			outputIpe = new OutputIpe();
+		}
 		
 		setTitle("ScheduleToIpe");
 		setSize(new Dimension(800, 600));
@@ -166,7 +188,7 @@ public class ScheduleToIpe extends JFrame {
 		leftPanel.add(new JScrollPane(taskList), BorderLayout.CENTER);
 		// buttons to create and delete tasks
 		JPanel controlPanel = new JPanel();
-		controlPanel.setLayout(new GridLayout(2, 1));
+		controlPanel.setLayout(new GridLayout(3, 1));
 		addTaskButton = new JButton("Add task");
 		addTaskButton.addActionListener(addTaskButtonListener);
 		controlPanel.add(addTaskButton);
@@ -174,6 +196,10 @@ public class ScheduleToIpe extends JFrame {
 		removeTaskButton.addActionListener(removeTaskButtonListener);
 		removeTaskButton.setEnabled(false);
 		controlPanel.add(removeTaskButton);
+		exportScheduleButton = new JButton("Export schedule to Ipe");
+		exportScheduleButton.addActionListener(exportScheduleButtonListener);
+		exportScheduleButton.setEnabled(false);
+		controlPanel.add(exportScheduleButton);
 		leftPanel.add(controlPanel, BorderLayout.PAGE_END);
 		add(leftPanel);
 		
@@ -182,5 +208,15 @@ public class ScheduleToIpe extends JFrame {
 		taskInfoPane.setEditable(false);
 		taskInfoPane.setText(NO_TASKS_INFO_TEXT);
 		add(taskInfoPane);
+	}
+	
+	/**
+	 * Show information about a given task.
+	 * 
+	 * @param taskName Name of the task.
+	 */
+	private void showInfoAbout(String taskName) {
+		taskInfoPane.setText(taskName);
+		// TODO: Use CardLayout in right panel and use input fields to let the user change name, period, execution time,...
 	}
 }
