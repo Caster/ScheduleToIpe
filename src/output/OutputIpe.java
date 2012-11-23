@@ -73,4 +73,38 @@ public class OutputIpe {
 		outputFromFile("/ipe_header.txt");
 	}
 	
+	/* methods to write "shapes" to the Ipe file */
+	
+	private final String SQUARE = "<path layer=\"alpha\" stroke=\"black\"> \n" +
+						"%f %f m \n" +
+						"%f %f l \n" +
+						"%f %f l \n" +
+						"%f %f l \n" +
+						"h \n" +
+						"</path> \n";
+	
+	private void writeSquare(double x, double y, double width, double height) throws IOException{
+		String square = String.format(SQUARE, x, y, x + width, y, x + width, y + height, x, y + height);
+		output.write(square.getBytes());
+	}
+	
+	private final String LINE = "<path stroke=\"black\"> \n" +
+				"%f %f m \n" +
+				"%f %f l \n" +
+				"</path> \n";
+	
+	private void writeLine(double x1, double y1, double x2, double y2) throws IOException{
+		String line = String.format(LINE, x1, y1, x2, y2);
+		output.write(line.getBytes());
+	}
+	
+	private final String STRING = "<text transformations=\"translations\" pos=\"%f %f\" " +
+								"stroke=\"black\" type=\"label\" valign=\"baseline\">%s</text> \n";
+	
+	private void writeString(String text, double x, double y) throws IOException{
+		String string = String.format(STRING, x, y, text);
+		output.write(string.getBytes());
+	}
+	
+	
 }
