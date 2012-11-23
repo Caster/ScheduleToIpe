@@ -18,29 +18,31 @@ import java.util.Set;
 public final class SchedulerAlgorithms {
 
 	/**
-	 * A Rate Monotonic scheduler; a static priority scheduler that uses the period for priority
+	 * A Rate Monotonic scheduler; a static priority scheduler that uses the
+	 * period for priority
 	 */
-	public final static SchedulerAlgorithm RATE_MONOTONIC = new StaticPriorityScheduler(){
-		
+	public final static SchedulerAlgorithm RATE_MONOTONIC = new StaticPriorityScheduler() {
+
 		@Override
-		protected int getPriority(Task task){
+		protected int getPriority(Task task) {
 			return -task.getPeriod();
 		}
 	};
-	
+
 	/**
-	 * A Deadline Monotonic scheduler; a static priority scheduler that uses the deadline for priority
+	 * A Deadline Monotonic scheduler; a static priority scheduler that uses the
+	 * deadline for priority
 	 */
-	public final static SchedulerAlgorithm DEADLINE_MONOTONIC = new StaticPriorityScheduler(){
-		
+	public final static SchedulerAlgorithm DEADLINE_MONOTONIC = new StaticPriorityScheduler() {
+
 		@Override
-		protected int getPriority(Task task){
+		protected int getPriority(Task task) {
 			return -task.getDeadline();
 		}
 	};
-	
+
 	public final static SchedulerAlgorithm EARLIEST_DEADLINE_FIRST = new DynamicPriorityScheduler() {
-		
+
 		@Override
 		protected int getPriority(Task task, int time) {
 			int relativeTime = time % task.getPeriod();
@@ -51,78 +53,96 @@ public final class SchedulerAlgorithms {
 	private SchedulerAlgorithms() {
 		// not used, this is a singleton object...
 	}
-	
+
 	/**
 	 * An abstract class used to create Dynamic Priority schedulers.
 	 */
-	private static abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
+	private static abstract class DynamicPriorityScheduler implements
+			SchedulerAlgorithm {
 		/**
-		 * Assigns a priority to a Task at a given time.
-		 * A higher priority will be scheduled first.
+		 * Assigns a priority to a Task at a given time. A higher priority will
+		 * be scheduled first.
 		 * 
-		 * @param task the Task to assign a priority.
-		 * @param time the current timestamp
+		 * @param task
+		 *            the Task to assign a priority.
+		 * @param time
+		 *            the current timestamp
 		 * @return a priority for Task {@code task}.
 		 */
 		protected abstract int getPriority(Task task, int time);
 
 		public Schedule createSchedule(Set<Task> tasks) {
-			
+
 			// the cyclus of this task set
 			int lcm = lcm(tasks);
-			
+
 			// the final schedule
 			List<Task> schedule = new ArrayList<Task>(lcm);
-			
+
 			// if there is a deadline missed
 			boolean deadlineMissed = false;
-			
-			// the tasks that are left, for each time unit of execution time left, there will be a task.
+
+			// the tasks that are left, for each time unit of execution time
+			// left, there will be a task.
 			List<Task> tasktimeLeft = new LinkedList<Task>();
-			
+
 			// walking over the timestamps
-			for (int t = 0; t < lcm && !deadlineMissed; t++){
-				
+			for (int t = 0; t < lcm && !deadlineMissed; t++) {
+
 				// adding new tasks
-				for (Task task: getReleasedTasksAt(t, tasks)){
+				for (Task task : getReleasedTasksAt(t, tasks)) {
+					
+					// checking for deadline miss from previous instance
+					if (tasktimeLeft.contains(task)) { 
+						// this task has still time left from its previous instance
+						deadlineMissed = true;
+						continue;
+					}
+					
 					// adding all required time units of the task to the queue
-					for (int i = 0; i < task.getExecutionTime(); i++){
+					for (int i = 0; i < task.getExecutionTime(); i++) {
+						
 						tasktimeLeft.add(task);
 					}
 				}
-				
+
 				// the task with the highest priority
 				Task nextTask = null;
 				// the priority of nextTask
 				int nextPriority = Integer.MIN_VALUE;
-				
+
 				// getting task with highest priority
-				for (Task task: tasktimeLeft){
+				for (Task task : tasktimeLeft) {
 					int priority = getPriority(task, t);
-					if (priority > nextPriority){
+					if (priority > nextPriority) {
 						nextTask = task;
 						nextPriority = priority;
 					}
 				}
-				
+
 				// removing the time of the Task
 				tasktimeLeft.remove(nextTask);
-				
-				// setting the task into the schedule (or determine deadline miss)
-				if (nextTask != null && nextTask.getDeadline() <= t % nextTask.getPeriod()){ // deadline missed
+
+				// setting the task into the schedule (or determine deadline
+				// miss)
+				if (nextTask != null
+						&& nextTask.getDeadline() <= t % nextTask.getPeriod()) { // deadline
+																					// missed
 					deadlineMissed = true;
 				} else { // can schedule this
 					schedule.add(nextTask);
 				}
-				
+
 			}
-			
+
+			// set deadlineMissed when there is stuff left in the list
+			deadlineMissed |= !tasktimeLeft.isEmpty();
+
 			return new Schedule(schedule, tasks, !deadlineMissed);
 		}
-		
+
 	}
 
-	
 	/**
 	 * An abstract class used to created static priority Scheduler algorithms.
 	 */
@@ -130,9 +150,11 @@ public final class SchedulerAlgorithms {
 			SchedulerAlgorithm {
 
 		/**
-		 * Assigns a priority to a Task. A higher priority will be scheduled first.
+		 * Assigns a priority to a Task. A higher priority will be scheduled
+		 * first.
 		 * 
-		 * @param task the Task to assign a priority.
+		 * @param task
+		 *            the Task to assign a priority.
 		 * @return a priority for Task {@code task}.
 		 */
 		protected abstract int getPriority(Task task);
@@ -144,44 +166,57 @@ public final class SchedulerAlgorithms {
 			for (Task task : tasks) {
 				priorities.put(task, getPriority(task));
 			}
-
 			TaskComparator comp = new TaskComparator(priorities);
-			PriorityQueue<Task> queue = new PriorityQueue<Task>(tasks.size(),
-					comp);
-			
+
 			// the cyclus of this task set
 			int lcm = lcm(tasks);
-			
+
+			// the queue containing an instance of a task for each execution
+			// time left
+			PriorityQueue<Task> queue = new PriorityQueue<Task>(lcm + 1, comp);
+
 			// the final schedule
 			List<Task> schedule = new ArrayList<Task>();
-			
+
 			boolean deadlineMissed = false;
-			
+
 			// walking over the timestamps
-			for (int t = 0; t < lcm && !deadlineMissed; t++){
-				
+			for (int t = 0; t < lcm && !deadlineMissed; t++) {
+
 				// adding new tasks
-				for (Task task: getReleasedTasksAt(t, tasks)){
+				for (Task task : getReleasedTasksAt(t, tasks)) {
+
+					// checking for deadline misses
+					if (queue.contains(task)) { 
+						// this task has still time left from its previous instance
+						deadlineMissed = true;
+						continue;
+					}
+
 					// adding all required time units of the task to the queue
-					for (int i = 0; i < task.getExecutionTime(); i++){
+					for (int i = 0; i < task.getExecutionTime(); i++) {
 						queue.add(task);
 					}
 				}
-				
-				// apparantly the queue returns null when empty, so should work...
+
+				// apparantly the queue returns null when empty, so should
+				// work...
 				Task task = queue.poll();
-				
-				if (task != null && task.getDeadline() <= t % task.getPeriod()){ // deadline missed
+
+				if (task != null && task.getDeadline() <= t % task.getPeriod()) { // deadline
+																					// missed
 					deadlineMissed = true;
 				} else { // can schedule this
 					schedule.add(t, task);
 				}
-				
+
 			}
-			
+
+			// set deadlineMissed when there is stuff left in the queue
+			deadlineMissed |= !queue.isEmpty();
+
 			return new Schedule(schedule, tasks, !deadlineMissed);
 		}
-		
 
 	}
 
@@ -201,21 +236,26 @@ public final class SchedulerAlgorithms {
 			return priorities.get(t2) - priorities.get(t1);
 		}
 	}
-	
+
 	/**
 	 * Gets the Tasks that are released at the given time.
-	 * @param time the time stamp to investigate
-	 * @param tasks the tasks to search through
-	 * @return the Tasks that are in {@code task} and are released at {@code time}
+	 * 
+	 * @param time
+	 *            the time stamp to investigate
+	 * @param tasks
+	 *            the tasks to search through
+	 * @return the Tasks that are in {@code task} and are released at
+	 *         {@code time}
 	 */
-	private static Collection<Task> getReleasedTasksAt(int time, Set<Task> tasks){
+	private static Collection<Task> getReleasedTasksAt(int time, Set<Task> tasks) {
 		Collection<Task> result = new LinkedList<Task>();
-		for (Task task: tasks){
-			if (time % task.getPeriod() == 0){ // we are at the start of his period...
+		for (Task task : tasks) {
+			if (time % task.getPeriod() == 0) { // we are at the start of his
+												// period...
 				result.add(task);
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -228,11 +268,11 @@ public final class SchedulerAlgorithms {
 	private static int lcm(Collection<Task> tasks) {
 		int[] periods = new int[tasks.size()];
 		int i = 0;
-		for (Task task: tasks){
+		for (Task task : tasks) {
 			periods[i] = task.getPeriod();
 			i++;
 		}
-		
+
 		return lcm(periods);
 	}
 
