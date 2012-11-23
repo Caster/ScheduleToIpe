@@ -2,14 +2,16 @@ package model;
 
 /**
  * A Task. Represents one task in the Schedule.
+ * 
  * @author Barnabbas
- *
+ * @author Thom Castermans
  */
-public class Task {
+public class Task implements Comparable<Task> {
 	
 	private String name;
-	private double period;
-	private double deadline;
+	private int period;
+	private int deadline;
+	private int priority;
 	private double executionTime;
 	
 	/**
@@ -20,10 +22,11 @@ public class Task {
 	 * @param tDeadline The relative deadline of this Task
 	 * @param tExecutionTime the execution time of this Task
 	 */
-	public Task(String tName, double tPeriod, double tDeadline, double tExecutionTime){
+	public Task(String tName, int tPeriod, int tDeadline, double tExecutionTime){
 		this.name = tName;
 		this.period = tPeriod;
 		this.deadline = tDeadline;
+		this.setPriority(0);
 		this.executionTime = tExecutionTime;
 	}
 	
@@ -49,7 +52,7 @@ public class Task {
 	 * The period of this Task.
 	 * @return The period of this Task.
 	 */
-	public double getPeriod(){
+	public int getPeriod(){
 		return period;
 	}
 	
@@ -63,10 +66,22 @@ public class Task {
 	}
 	
 	/**
+	 * Given the current system time, return the absolute deadline
+	 * of this task.
+	 * 
+	 * @param time The current system time.
+	 * @return The absolute deadline of this task at the given time.
+	 */
+	public int getAbsoluteDeadline(double time) {
+		// First, calculate the start of the period. Then, add the relative deadline.
+		return ((int) Math.round(time - (time % getPeriod()))) + getDeadline();
+	}
+	
+	/**
 	 * The relative deadline of this Task. 
 	 * @return the relative deadline of this Task.
 	 */
-	public double getDeadline(){
+	public int getDeadline(){
 		return deadline;
 	}
 	
@@ -92,8 +107,26 @@ public class Task {
 	 * 
 	 * @param newExecutionTime New execution time for this task.
 	 */
-	public void setExecutionTime(int newExecutionTime) {
+	public void setExecutionTime(double newExecutionTime) {
 		this.executionTime = newExecutionTime;
+	}
+	
+	/**
+	 * Return the priority of this task.
+	 * 
+	 * @return The priority of this task.
+	 */
+	public int getPriority() {
+		return priority;
+	}
+
+	/**
+	 * Change the priority of this task.
+	 * 
+	 * @param newPriority New priority for this task.
+	 */
+	public void setPriority(int newPriority) {
+		this.priority = newPriority;
 	}
 	
 	@Override
@@ -105,16 +138,15 @@ public class Task {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + deadline;
 		long temp;
-		temp = Double.doubleToLongBits(deadline);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
 		temp = Double.doubleToLongBits(executionTime);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		temp = Double.doubleToLongBits(period);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + period;
 		return result;
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -125,8 +157,7 @@ public class Task {
 		if (getClass() != obj.getClass())
 			return false;
 		Task other = (Task) obj;
-		if (Double.doubleToLongBits(deadline) != Double
-				.doubleToLongBits(other.deadline))
+		if (deadline != other.deadline)
 			return false;
 		if (Double.doubleToLongBits(executionTime) != Double
 				.doubleToLongBits(other.executionTime))
@@ -136,9 +167,14 @@ public class Task {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (Double.doubleToLongBits(period) != Double
-				.doubleToLongBits(other.period))
+		if (period != other.period)
 			return false;
 		return true;
+	}
+
+	@Override
+	public int compareTo(Task that) {
+		// a task with a higher priority is "less than" this task
+		return that.priority - this.priority;
 	}
 }

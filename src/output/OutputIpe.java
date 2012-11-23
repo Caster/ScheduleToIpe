@@ -7,13 +7,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Set;
 
 import model.Schedule;
 import model.Task;
+import model.TaskInstance;
 
 /**
  * This class can be used to output a schedule to an IPE file.
@@ -65,6 +64,7 @@ public class OutputIpe {
 	public static final int TEXT_MARGIN = GRID_SIZE / 5;
 	
 	private PrintStream output;
+	private File outFile = null;
 	
 	/**
 	 * Create a new object capable of outputting to the default output.
@@ -81,6 +81,7 @@ public class OutputIpe {
 	 */
 	public OutputIpe(File file) throws FileNotFoundException {
 		output = new PrintStream(new FileOutputStream(file));
+		outFile = file;
 	}
 	
 	/**
@@ -90,17 +91,60 @@ public class OutputIpe {
 	 * @param schedule The schedule to be outputted.
 	 */
 	public void outputIpeFile(Schedule schedule) {
+		if (outFile != null) {
+			try {
+				output = new PrintStream(new FileOutputStream(outFile));
+			} catch (FileNotFoundException e) {
+				// Does not occur by construction, see constructor: we check it there already
+				e.printStackTrace();
+			}
+		}
 		Set<Task> tasks = schedule.getTasks();
-		Task curTask, prevTask = null;
+		TaskInstance curTaskInstance, prevTaskInstance = null;
 		int i, j;
 		
 		// Ipe header
 		outputHeader();
 		
+		// Draw tasks
+		double time = 0;
+		while (time < schedule.getLcm()) {
+			curTaskInstance = schedule.getTaskInstanceAt(time);
+			if (curTaskInstance == null) {
+				if (schedule.getNextTaskAt(time) == null)  break;
+				time = schedule.getNextTaskAt(time).getStart();
+				curTaskInstance = schedule.getTaskInstanceAt(time);
+			}
+			
+			j = 0;
+			for (Task tt : tasks) {
+				if (tt.equals(curTaskInstance.getTask()))  break;
+				j++;
+			}
+			writeSquareFilled(
+					OFFSET_X + GRID_SIZE * curTaskInstance.getStart() +
+						(prevTaskInstance != null && curTaskInstance.getTask().equals(prevTaskInstance.getTask()) ? -PADDING : PADDING),
+					OFFSET_Y + GRID_SIZE * (j - tasks.size()) + PADDING,
+					GRID_SIZE * (curTaskInstance.getEnd() - curTaskInstance.getStart()) -
+						(prevTaskInstance != null && curTaskInstance.getTask().equals(prevTaskInstance.getTask()) ? 0 : 2 * PADDING),
+					GRID_SIZE - 2 * PADDING,
+					IPE_COLORS[j % IPE_COLORS.length]
+				);
+			prevTaskInstance = curTaskInstance;
+			time = curTaskInstance.getEnd();
+		}
+		
 		// Draw axis
 		writeLine(OFFSET_X, OFFSET_Y - GRID_SIZE * tasks.size(),
 				OFFSET_X + GRID_SIZE * schedule.getLcm(), OFFSET_Y - GRID_SIZE * tasks.size());
 		writeLine(OFFSET_X, OFFSET_Y, OFFSET_X, OFFSET_Y - GRID_SIZE * tasks.size());
+		// write X-axis scale
+		for (i = 0; i <= schedule.getLcm(); i++) {
+			writeString("$" + i + "$",
+					OFFSET_X + GRID_SIZE * i, OFFSET_Y - GRID_SIZE * tasks.size() - TEXT_MARGIN,
+					"center", "top");
+		}
+		
 		// write Y-axis task names
 		j = 0;
 		for (Task tt : tasks) {
@@ -109,30 +153,6 @@ public class OutputIpe {
 					"right", "center");
 			j++;
 		}
-		
-		// Draw tasks
-		for (i = 0; i < schedule.getLcm(); i++) {
-			// write X-axis scale
-			writeString("$" + i + "$",
-					OFFSET_X + GRID_SIZE * i, OFFSET_Y - GRID_SIZE * tasks.size() - TEXT_MARGIN,
-					"center", "top");
-			curTask = schedule.getTaskAt(i);
-			if (curTask == null)  continue;
-			j = 0;
-			for (Task tt : tasks) {
-				if (tt.equals(curTask))  break;
-				j++;
-			}
-			writeSquareFilled(
-					OFFSET_X + GRID_SIZE * i + (curTask.equals(prevTask) ? -PADDING : PADDING),
-					OFFSET_Y + GRID_SIZE * (j - tasks.size()) + PADDING,
-					GRID_SIZE - (curTask.equals(prevTask) ? 0 : 2 * PADDING), GRID_SIZE - 2 * PADDING,
-					IPE_COLORS[j % IPE_COLORS.length]
-				);
-			prevTask = curTask;
-		}
-		// write X-axis scale
-		writeString("$" + i + "$", OFFSET_X + GRID_SIZE * i, OFFSET_Y - GRID_SIZE * tasks.size() - GRID_SIZE / 5, "center", "top");
 		
 		// Ipe footer
 		outputFooter();

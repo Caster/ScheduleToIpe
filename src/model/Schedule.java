@@ -2,6 +2,7 @@ package model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -10,67 +11,105 @@ import java.util.Set;
  * This object contains information about our schedule.
  * 
  * @author Barnabbas
+ * @author Thom Castermans
  */
 public class Schedule {
 	
 	private final Set<Task> tasks;
-	private final List<Task> taskSchedule;
+	private final List<TaskInstance> taskSchedule;
 	private final boolean isFeasible;
 	
 	/**
-	 * Constructs a new Schedule.<br>
-	 * The schedule will consists of the Tasks in {@code schedule} such that 
-	 * {@code getTask(i) == schedule.get(i)}.
-	 * When there is no Task at a certain moment, then {@code null} has to be placed there.
-	 * The length of {@code schedule} indicates the LCM for this Schedule.
+	 * Constructs a new Schedule from a given list of TaskInstances and Tasks.
 	 * 
-	 * @param sSchedule the schedule for the Tasks.
-	 * @param sTasks the Tasks this schedule contains (can contain more then schedule).
-	 * @param sIsFeasible if this schedule is a schedule without deadline miss
+	 * @param sSchedule The schedule for the Tasks.
+	 * @param sIsFeasible If this schedule is a schedule without deadline miss.
 	 */
-	Schedule(List<Task> sSchedule, Set<Task> sTasks, boolean sIsFeasible){
+	public Schedule (List<TaskInstance> sSchedule, boolean sIsFeasible) {
 		// using unmodifiables to guarantee immutability.
-		taskSchedule = Collections.unmodifiableList(new ArrayList<Task>(sSchedule));
+		ArrayList<TaskInstance> sScheduleArrayList = new ArrayList<TaskInstance>(sSchedule);
+		Collections.sort(sScheduleArrayList); // sort taskinstances on start-time
+		taskSchedule = Collections.unmodifiableList(sScheduleArrayList);
+		// build up set of tasks in schedule
+		HashSet<Task> sTasks = new HashSet<Task>();
+		for (TaskInstance ti : sSchedule) {
+			if (!sTasks.contains(ti.getTask())) {
+				sTasks.add(ti.getTask());
+			}
+		}
 		this.tasks = Collections.unmodifiableSet(sTasks);
 		this.isFeasible = sIsFeasible;
 	}
 	
 	/**
-	 * Gets the tasks of this Schedule.
-	 * @return a List containing the tasks of this Schedule.
+	 * Return the next task running after given time (given time is included
+	 * in finding tasks). If no task runs at or after given time, then
+	 * {@code null} is returned.
+	 * 
+	 * <p>The start time of the returned TaskInstance is the time when the task
+	 * starts running on the CPU and the end time is when the task stops running.
+	 * Note that when the task stops running, either another task may start running
+	 * or no task may be scheduled for some time, or no task may be scheduled at all
+	 * anymore, all of which cases can be found by calling this method with the end
+	 * time of the returned TaskInstance.
+	 * 
+	 * @param time Time to check.
+	 * @return TaskInstance of task running at or after given time, or
+	 *         {@code null} if no such tasks exists in this schedule.
 	 */
-	public Set<Task> getTasks(){
+	public TaskInstance getNextTaskAt(double time) {
+		for (TaskInstance ti : taskSchedule) {
+			if (ti.getStart() >= time)  return ti;
+		}
+		return null;
+	}
+	
+	/**
+	 * Return the tasks of this Schedule.
+	 * 
+	 * @return A {@link Set} containing the tasks of this {@link Schedule}.
+	 */
+	public Set<Task> getTasks() {
 		return tasks;
 	}
 	
 	/**
-	 * The task that runs immediatly after the given time.
-	 * Returns {@code null} when no Task will run at that moment. <br>
-	 * {@code time} must be smaller then the LCM of this Schedule.
+	 * Returns the task that runs at the given time.
+	 * Returns {@code null} when no Task will run at that moment.
 	 * 
-	 * 
-	 * @param time the timestamp of the moment you want the task of.
-	 * @return the Task that runs immediatly after the given timestamp or 
-	 * {@code null} if there is no such Task.
-	 * 
-	 * @throws IllegalArgumentException if {@code time} is larger then the LCM
+	 * @param time The system time at which caller wants to know which task runs.
+	 * @return The Task that runs after the given time or {@code null} if there is no such Task.
 	 */
-	public Task getTaskAt(int time) throws IllegalArgumentException{
-		if (time >= taskSchedule.size()){
-			throw new IllegalArgumentException("The given time is not within lcm, time is " + time);
+	public Task getTaskAt(double time) {
+		for (TaskInstance ti : taskSchedule) {
+			if (ti.getStart() <= time && time < ti.getEnd())  return ti.getTask();
 		}
-		
-		return taskSchedule.get(time);
+		return null;
 	}
 	
 	/**
-	 * The length of a cycle of this Schedule.<br>
-	 * This is the least common multiplier of the periods of the Tasks.
+	 * Returns the task instance that runs at the given time.
+	 * Returns {@code null} when no Task will run at that moment.
+	 * 
+	 * @param time The system time at which caller wants to know which task runs.
+	 * @return The Task that runs after the given time or {@code null} if there is no such Task.
+	 */
+	public TaskInstance getTaskInstanceAt(double time) {	
+		for (TaskInstance ti : taskSchedule) {
+			if (ti.getStart() <= time && time < ti.getEnd())  return ti;
+		}
+		return null;
+	}
+	
+	/**
+	 * The length of a cycle of this Schedule.
+	 * 
+	 * <p>This is the least common multiple of the periods of the Tasks.
+	 * 
 	 * @return Length of a cycle of this Schedule.
 	 */
 	public int getLcm(){
-		// this assumes that the given taskSchedule is valid
-		return taskSchedule.size();
+		return Utils.lcm(tasks);
 	}
 	
 	/**
