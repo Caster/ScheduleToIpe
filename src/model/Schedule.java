@@ -42,6 +42,16 @@ public class Schedule {
 	}
 	
 	/**
+	 * Return the last task instance in this schedule.
+	 * 
+	 * @return The last task instance in this schedule.
+	 */
+	public TaskInstance getLastTaskInstance() {
+		TaskInstance[] taskInstances = taskSchedule.toArray(new TaskInstance[] {});
+		return taskInstances[taskInstances.length - 1];
+	}
+	
+	/**
 	 * Return the next task running after given time (given time is included
 	 * in finding tasks). If no task runs at or after given time, then
 	 * {@code null} is returned.

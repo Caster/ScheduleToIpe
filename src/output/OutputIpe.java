@@ -106,6 +106,23 @@ public class OutputIpe {
 		// Ipe header
 		outputHeader();
 		
+		// Draw deadline miss, if any
+		if (!schedule.isFeasible()) {
+			TaskInstance lastTaskInstance = schedule.getLastTaskInstance();
+			j = 0;
+			for (Task tt : tasks) {
+				if (tt.equals(lastTaskInstance.getTask()))  break;
+				j++;
+			}
+			writeLine(
+					OFFSET_X + GRID_SIZE * lastTaskInstance.getTask().getAbsoluteDeadline(lastTaskInstance.getStart()),
+					OFFSET_Y - GRID_SIZE * tasks.size(),
+					OFFSET_X + GRID_SIZE * lastTaskInstance.getTask().getAbsoluteDeadline(lastTaskInstance.getStart()),
+					OFFSET_Y + GRID_SIZE,
+					"red", "dashed"
+				);
+		}
+		
 		// Draw tasks
 		double time = 0;
 		while (time < schedule.getLcm()) {
@@ -136,8 +153,8 @@ public class OutputIpe {
 		
 		// Draw axis
 		writeLine(OFFSET_X, OFFSET_Y - GRID_SIZE * tasks.size(),
-				OFFSET_X + GRID_SIZE * schedule.getLcm(), OFFSET_Y - GRID_SIZE * tasks.size());
-		writeLine(OFFSET_X, OFFSET_Y, OFFSET_X, OFFSET_Y - GRID_SIZE * tasks.size());
+				OFFSET_X + GRID_SIZE * schedule.getLcm(), OFFSET_Y - GRID_SIZE * tasks.size(), "black", null);
+		writeLine(OFFSET_X, OFFSET_Y, OFFSET_X, OFFSET_Y - GRID_SIZE * tasks.size(), "black", null);
 		// write X-axis scale
 		for (i = 0; i <= schedule.getLcm(); i++) {
 			writeString("$" + i + "$",
@@ -229,14 +246,24 @@ public class OutputIpe {
 	}
 	
 	private final String LINE =
-			"<path stroke=\"black\"> \n" +
+			"<path stroke=\"%s\"> \n" +
+				"%f %f m \n" +
+				"%f %f l \n" +
+			"</path> \n";
+	private final String LINE_DASHED =
+			"<path stroke=\"%s\" dash=\"%s\"> \n" +
 				"%f %f m \n" +
 				"%f %f l \n" +
 			"</path> \n";
 	
 	@SuppressWarnings("boxing")
-	private void writeLine(double x1, double y1, double x2, double y2) {
-		String line = String.format(Locale.US, LINE, x1, y1, x2, y2);
+	private void writeLine(double x1, double y1, double x2, double y2, String color, String dashed) {
+		String line = "";
+		if (dashed != null) {
+			line = String.format(Locale.US, LINE_DASHED, color, dashed, x1, y1, x2, y2);
+		} else {
+			line = String.format(Locale.US, LINE, color, x1, y1, x2, y2);
+		}
 		try {
 			output.write(line.getBytes());
 		} catch (IOException e) {

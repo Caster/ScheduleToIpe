@@ -13,22 +13,20 @@ import model.TaskInstance;
 import model.Utils;
 
 /**
- * An abstract class used to create Dynamic Priority schedulers.
+ * An abstract class used to create Static Priority schedulers.
  * 
  * @author Barnabbas
  * @author Thom Castermans
  */
-public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
+public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 	
 	/**
-	 * Assigns a priority to a Task at a given time. A higher priority will
-	 * be scheduled first.
+	 * Assigns a priority to a Task.
 	 * 
 	 * @param task The Task to assign a priority to.
-	 * @param time The current system time.
 	 * @return A priority for Task {@code task}.
 	 */
-	protected abstract int getPriority(Task task, double time);
+	protected abstract int getPriority(Task task);
 
 	/**
 	 * Create a schedule for the given set of tasks.
@@ -45,7 +43,7 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 		// queue, used to get the task with highest priority and schedule it
 		PriorityQueue<TaskExecutionTime> taskQueue = new PriorityQueue<TaskExecutionTime>();
 		for (Task t : tasks) {
-			t.setPriority(getPriority(t, 0));
+			t.setPriority(getPriority(t));
 			taskQueue.add(new TaskExecutionTime(t));
 		}
 		
@@ -53,10 +51,6 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 		double newSysTime = 0;
 		TaskExecutionTime te;
 		while (sysTime < lcm) {
-			// TODO: Refresh the priority of all tasks in the queue by calling 'getPriority' again.
-			//       Maybe it should be possible to switch this off, as for example EDF does not
-			//       need it and it is a major performance boost to not do it.
-			
 			// If the queue is empty, skip to the time when a task becomes available
 			// and add that task to the queue
 			if (taskQueue.isEmpty()) {
@@ -104,7 +98,6 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 				 * than the result of the new system time.
 				 */
 				if (sysTime % t.getPeriod() > newSysTime % t.getPeriod() && newSysTime < lcm) {
-					t.setPriority(getPriority(t, newSysTime));
 					taskQueue.add(new TaskExecutionTime(t));
 				}
 			}
