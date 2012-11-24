@@ -16,7 +16,7 @@ import java.util.Set;
 public class Schedule {
 	
 	private final Set<Task> tasks;
-	private final List<TaskInstance> taskSchedule;
+	private ArrayList<TaskInstance> taskSchedule;
 	private final boolean isFeasible;
 	private final Task taskThatMissedDeadline;
 	
@@ -27,10 +27,9 @@ public class Schedule {
 	 * @param sSchedule The schedule for the Tasks.
 	 */
 	public Schedule (List<TaskInstance> sSchedule) {
-		// using unmodifiables to guarantee immutability.
 		ArrayList<TaskInstance> sScheduleArrayList = new ArrayList<TaskInstance>(sSchedule);
 		Collections.sort(sScheduleArrayList); // sort taskinstances on start-time
-		taskSchedule = Collections.unmodifiableList(sScheduleArrayList);
+		taskSchedule = sScheduleArrayList;
 		// build up set of tasks in schedule
 		HashSet<Task> sTasks = new HashSet<Task>();
 		for (TaskInstance ti : sSchedule) {
@@ -52,10 +51,9 @@ public class Schedule {
 	 * @param sMissedDeadline The task that missed its deadline.
 	 */
 	public Schedule (List<TaskInstance> sSchedule, Task sMissedDeadline) {
-		// using unmodifiables to guarantee immutability.
 		ArrayList<TaskInstance> sScheduleArrayList = new ArrayList<TaskInstance>(sSchedule);
 		Collections.sort(sScheduleArrayList); // sort taskinstances on start-time
-		taskSchedule = Collections.unmodifiableList(sScheduleArrayList);
+		taskSchedule = sScheduleArrayList;
 		// build up set of tasks in schedule
 		HashSet<Task> sTasks = new HashSet<Task>();
 		for (TaskInstance ti : sSchedule) {
@@ -66,6 +64,25 @@ public class Schedule {
 		this.tasks = Collections.unmodifiableSet(sTasks);
 		this.isFeasible = false;
 		this.taskThatMissedDeadline = sMissedDeadline;
+	}
+	
+	/**
+	 * Compress this schedule. That is, if two TaskInstances next to eachother
+	 * run the same task, then merge those.
+	 */
+	public void compress() {
+		for (int i = taskSchedule.size() - 1; i > 0; i--) {
+			if (taskSchedule.get(i).getTask().equals(taskSchedule.get(i - 1).getTask())) {
+				TaskInstance newTI = new TaskInstance(
+						taskSchedule.get(i).getTask(),
+						taskSchedule.get(i - 1).getStart(),
+						taskSchedule.get(i).getEnd()
+					);
+				taskSchedule.remove(i);
+				taskSchedule.remove(i - 1);
+				taskSchedule.add(i - 1, newTI);
+			}
+		}
 	}
 	
 	/**

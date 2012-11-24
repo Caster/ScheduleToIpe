@@ -103,6 +103,9 @@ public class OutputIpe {
 			}
 		}
 		
+		// Compress schedule, it is easier to have nice output like this
+		schedule.compress();
+		
 		// Get tasks in the schedule, convert this to a list and
 		// sort the list so that tasks are sorted by name
 		Set<Task> tasksSet = schedule.getTasks();
