@@ -7,6 +7,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.Set;
 
@@ -99,7 +102,19 @@ public class OutputIpe {
 				e.printStackTrace();
 			}
 		}
-		Set<Task> tasks = schedule.getTasks();
+		
+		// Get tasks in the schedule, convert this to a list and
+		// sort the list so that tasks are sorted by name
+		Set<Task> tasksSet = schedule.getTasks();
+		ArrayList<Task> tasks = new ArrayList<Task>(tasksSet);
+		Collections.sort(tasks, new Comparator<Task>() {
+			@Override
+			public int compare(Task o1, Task o2) {
+				return o2.getName().compareTo(o1.getName());
+			}
+		});
+		
+		// Some variable declarations
 		TaskInstance curTaskInstance, prevTaskInstance = null;
 		int i, j;
 		
