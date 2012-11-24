@@ -82,17 +82,11 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 			if (te.getExecutionTimeLeft() == 0) {
 				taskQueue.poll();
 			}
-			// Check for all tasks if they now have missed their respective deadlines.
-			// If so, return the schedule we have so far and indicate that it is
-			// not feasible.
+			// If the deadline is passed after execution of the task,
+			// we have a deadline miss and thus return the schedule so
+			// far, that is not feasible.
 			for (TaskExecutionTime tmpTE : taskQueue) {
-				double lastStartTime = 0;
-				for (TaskInstance tmpTI : schedule) {
-					if (tmpTI.getTask().equals(tmpTE.getTask()) && tmpTI.getStart() > lastStartTime) {
-						lastStartTime = tmpTI.getStart();
-					}
-				}
-				if (tmpTE.getTask().getAbsoluteDeadline(lastStartTime) < newSysTime) {
+				if (tmpTE.getTask().getAbsoluteDeadline(sysTime) < newSysTime) {
 					return new Schedule(schedule, tmpTE.getTask());
 				}
 			}
@@ -108,6 +102,13 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 				 * than the result of the new system time.
 				 */
 				if (sysTime % t.getPeriod() > newSysTime % t.getPeriod() && newSysTime < lcm) {
+					// If the task is still in the queue, we have a deadline miss!
+					for(TaskExecutionTime tmpTE : taskQueue) {
+						if (tmpTE.getTask().equals(t)) {
+							return new Schedule(schedule, t);
+						}
+					}
+					
 					taskQueue.add(new TaskExecutionTime(t));
 				}
 			}

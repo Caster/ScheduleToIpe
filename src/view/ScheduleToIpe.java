@@ -156,7 +156,7 @@ public class ScheduleToIpe extends JFrame {
 						)
 				);
 			outputIpe.outputIpeFile(schedule);
-			System.out.println(schedule);
+			//System.out.println(schedule);
 		}
 	};
 	/** Input with name of task that is currenlty edited. */

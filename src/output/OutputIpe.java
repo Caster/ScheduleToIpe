@@ -121,23 +121,6 @@ public class OutputIpe {
 		// Ipe header
 		outputHeader();
 		
-		// Draw deadline miss, if any
-		if (!schedule.isFeasible()) {
-			TaskInstance lastTaskInstance = schedule.getMissedTaskLastInstance();
-			j = 0;
-			for (Task tt : tasks) {
-				if (tt.equals(lastTaskInstance.getTask()))  break;
-				j++;
-			}
-			writeLine(
-					OFFSET_X + GRID_SIZE * lastTaskInstance.getTask().getAbsoluteDeadline(lastTaskInstance.getStart()),
-					OFFSET_Y - GRID_SIZE * tasks.size(),
-					OFFSET_X + GRID_SIZE * lastTaskInstance.getTask().getAbsoluteDeadline(lastTaskInstance.getStart()),
-					OFFSET_Y + GRID_SIZE,
-					"red", "dashed"
-				);
-		}
-		
 		// Draw tasks
 		double time = 0;
 		while (time < schedule.getLcm()) {
@@ -186,6 +169,32 @@ public class OutputIpe {
 			j++;
 		}
 		
+		// Draw deadline miss, if any
+		if (!schedule.isFeasible()) {
+			// First, draw dashed border around last instance of task that
+			// missed its deadline and draw a dashed line where the deadline is.
+			TaskInstance lastTaskInstance = schedule.getMissedTaskLastInstance();
+			j = 0;
+			for (Task tt : tasks) {
+				if (tt.equals(lastTaskInstance.getTask()))  break;
+				j++;
+			}
+			writeSquare(
+					OFFSET_X + GRID_SIZE * lastTaskInstance.getStart(),
+					OFFSET_Y + GRID_SIZE * (j - tasks.size()),
+					GRID_SIZE * (lastTaskInstance.getEnd() - lastTaskInstance.getStart()),
+					GRID_SIZE,
+					"black", "dashed"
+				);
+			writeLine(
+					OFFSET_X + GRID_SIZE * lastTaskInstance.getTask().getAbsoluteDeadline(lastTaskInstance.getStart()),
+					OFFSET_Y - GRID_SIZE * tasks.size(),
+					OFFSET_X + GRID_SIZE * lastTaskInstance.getTask().getAbsoluteDeadline(lastTaskInstance.getStart()),
+					OFFSET_Y + GRID_SIZE,
+					"black", "dashed"
+				);
+		}
+		
 		// Ipe footer
 		outputFooter();
 	}
@@ -224,7 +233,7 @@ public class OutputIpe {
 	
 	/* methods to write "shapes" to the Ipe file */
 	private final String SQUARE = 
-			"<path layer=\"alpha\" stroke=\"black\"> \n" +
+			"<path layer=\"alpha\" stroke=\"%s\" dash=\"%s\"> \n" +
 				"%f %f m \n" +
 				"%f %f l \n" +
 				"%f %f l \n" +
@@ -241,8 +250,8 @@ public class OutputIpe {
 			"</path> \n";
 	
 	@SuppressWarnings("boxing")
-	private void writeSquare(double x, double y, double width, double height) {
-		String square = String.format(Locale.US, SQUARE, x, y, x + width, y, x + width, y + height, x, y + height);
+	private void writeSquare(double x, double y, double width, double height, String color, String dashed) {
+		String square = String.format(Locale.US, SQUARE, color, dashed, x, y, x + width, y, x + width, y + height, x, y + height);
 		try {
 			output.write(square.getBytes());
 		} catch (IOException e) {
