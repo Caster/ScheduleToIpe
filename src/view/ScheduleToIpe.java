@@ -280,7 +280,10 @@ public class ScheduleToIpe extends JFrame {
 				}
 				if (t == null)  return;
 				if (canChangeName) {
+					String oldName = t.getName();
 					t.setName(inputTaskName.getText());
+					taskListModel.setElementAt(t.getName(), taskListModel.indexOf(oldName));
+					taskList.repaint();
 				} else {
 					inputTaskName.setText(t.getName());
 				}
