@@ -13,19 +13,23 @@ import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import model.Schedule;
 import model.Task;
-import model.scheduleralgorithms.DeadlineMonotonic;
+import model.scheduleralgorithms.SupportedSchedulers;
+import model.scheduleralgorithms.SupportedSchedulers.SUPPORTED_SCHEDULING_ALGORITHMS;
 import output.OutputIpe;
 
 /**
@@ -143,28 +147,28 @@ public class ScheduleToIpe extends JFrame {
 	ActionListener exportScheduleButtonListener = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// EDF
-//			EarliestDeadlineFirst edf = new EarliestDeadlineFirst();
-//			outputIpe.outputIpeFile(edf.createSchedule(createdTasks));
-//			System.out.println(edf.createSchedule(createdTasks));
-			// RM
-//			RateMonotonic rm = new RateMonotonic();
-//			outputIpe.outputIpeFile(rm.createSchedule(createdTasks));
-//			System.out.println(rm.createSchedule(createdTasks));
-			// DM
-			DeadlineMonotonic dm = new DeadlineMonotonic();
-			outputIpe.outputIpeFile(dm.createSchedule(createdTasks));
-			System.out.println(dm.createSchedule(createdTasks));
+			Schedule schedule = SupportedSchedulers.createSchedule(
+					createdTasks,
+					SUPPORTED_SCHEDULING_ALGORITHMS.valueOf(
+							inputTaskSchedulingAlgorithm.getItemAt(
+									inputTaskSchedulingAlgorithm.getSelectedIndex()
+								)
+						)
+				);
+			outputIpe.outputIpeFile(schedule);
+			System.out.println(schedule);
 		}
 	};
 	/** Input with name of task that is currenlty edited. */
-	private JTextPane inputTaskName;
+	private JTextField inputTaskName;
 	/** Input with period of task that is currenlty edited. */
-	private JTextPane inputTaskPeriod;
+	private JTextField inputTaskPeriod;
 	/** Input with deadline of task that is currenlty edited. */
-	private JTextPane inputTaskDeadline;
+	private JTextField inputTaskDeadline;
 	/** Input with execution time of task that is currenlty edited. */
-	private JTextPane inputTaskExecutionTime;
+	private JTextField inputTaskExecutionTime;
+	/** Dropdown select with available algorithms. */
+	private JComboBox<String> inputTaskSchedulingAlgorithm;
 	
 	/** Tasks created by the user. */
 	Set<Task> createdTasks;
@@ -222,10 +226,17 @@ public class ScheduleToIpe extends JFrame {
 		removeTaskButton.addActionListener(removeTaskButtonListener);
 		removeTaskButton.setEnabled(false);
 		controlPanel.add(removeTaskButton);
+		JPanel exportPanel = new JPanel(new BorderLayout());
+		inputTaskSchedulingAlgorithm = new JComboBox<String>();
+		for (SUPPORTED_SCHEDULING_ALGORITHMS algorithm : SUPPORTED_SCHEDULING_ALGORITHMS.values()) {
+			inputTaskSchedulingAlgorithm.addItem(algorithm.toString());
+		}
+		exportPanel.add(inputTaskSchedulingAlgorithm, BorderLayout.WEST);
 		exportScheduleButton = new JButton("Export schedule to Ipe");
 		exportScheduleButton.addActionListener(exportScheduleButtonListener);
 		exportScheduleButton.setEnabled(false);
-		controlPanel.add(exportScheduleButton);
+		exportPanel.add(exportScheduleButton, BorderLayout.CENTER);
+		controlPanel.add(exportPanel);
 		leftPanel.add(controlPanel, BorderLayout.PAGE_END);
 		add(leftPanel);
 		
@@ -240,16 +251,16 @@ public class ScheduleToIpe extends JFrame {
 		JPanel taskInfoPanel = new JPanel(new BorderLayout());
 		JPanel formPanel = new JPanel(new GridLayout(9, 1));
 		formPanel.add(new JLabel("The name of the task:"));
-		inputTaskName = new JTextPane();
+		inputTaskName = new JTextField();
 		formPanel.add(inputTaskName);
 		formPanel.add(new JLabel("The period (T) of the task:"));
-		inputTaskPeriod = new JTextPane();
+		inputTaskPeriod = new JTextField();
 		formPanel.add(inputTaskPeriod);
 		formPanel.add(new JLabel("The deadline (D) of the task:"));
-		inputTaskDeadline = new JTextPane();
+		inputTaskDeadline = new JTextField();
 		formPanel.add(inputTaskDeadline);
 		formPanel.add(new JLabel("The execution time (C) of the task:"));
-		inputTaskExecutionTime = new JTextPane();
+		inputTaskExecutionTime = new JTextField();
 		formPanel.add(inputTaskExecutionTime);
 		JPanel saveButtonPanel = new JPanel(new BorderLayout());
 		JButton saveButton = new JButton("Save");

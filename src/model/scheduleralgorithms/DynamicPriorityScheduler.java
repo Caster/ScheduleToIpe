@@ -86,11 +86,19 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 			if (te.getExecutionTimeLeft() == 0) {
 				taskQueue.poll();
 			}
-			// If the deadline is passed after execution of the task,
-			// we have a deadline miss and thus return the schedule so
-			// far, that is not feasible.
-			if (te.getTask().getAbsoluteDeadline(sysTime) < newSysTime) {
-				return new Schedule(schedule, false);
+			// Check for all tasks if they now have missed their respective deadlines.
+			// If so, return the schedule we have so far and indicate that it is
+			// not feasible.
+			for (TaskExecutionTime tmpTE : taskQueue) {
+				double lastStartTime = 0;
+				for (TaskInstance tmpTI : schedule) {
+					if (tmpTI.getTask().equals(tmpTE.getTask()) && tmpTI.getStart() > lastStartTime) {
+						lastStartTime = tmpTI.getStart();
+					}
+				}
+				if (tmpTE.getTask().getAbsoluteDeadline(lastStartTime) < newSysTime) {
+					return new Schedule(schedule, tmpTE.getTask());
+				}
 			}
 			// If a task becomes available while executing this task,
 			// add the new task(s) to the queue
@@ -111,7 +119,7 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 			sysTime = newSysTime;
 		}
 
-		return new Schedule(schedule, sysTime <= lcm);
+		return new Schedule(schedule);
 	}
 
 }

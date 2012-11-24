@@ -50,7 +50,7 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 		double sysTime = 0;
 		double newSysTime = 0;
 		TaskExecutionTime te;
-		while (sysTime < lcm) {
+		while (sysTime <= lcm) {
 			// If the queue is empty, skip to the time when a task becomes available
 			// and add that task to the queue
 			if (taskQueue.isEmpty()) {
@@ -75,16 +75,26 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 			// Get a task from the queue, let it execute
 			te = taskQueue.peek();
 			newSysTime = sysTime + te.execute(1);
-			schedule.add(new TaskInstance(te.getTask(), sysTime, newSysTime));
+			if (newSysTime <= lcm) {
+				schedule.add(new TaskInstance(te.getTask(), sysTime, newSysTime));
+			}
 			// Remove the task from the queue if it is done with its execution
 			if (te.getExecutionTimeLeft() == 0) {
 				taskQueue.poll();
 			}
-			// If the deadline is passed after execution of the task,
-			// we have a deadline miss and thus return the schedule so
-			// far, that is not feasible.
-			if (te.getTask().getAbsoluteDeadline(sysTime) < newSysTime) {
-				return new Schedule(schedule, false);
+			// Check for all tasks if they now have missed their respective deadlines.
+			// If so, return the schedule we have so far and indicate that it is
+			// not feasible.
+			for (TaskExecutionTime tmpTE : taskQueue) {
+				double lastStartTime = 0;
+				for (TaskInstance tmpTI : schedule) {
+					if (tmpTI.getTask().equals(tmpTE.getTask()) && tmpTI.getStart() > lastStartTime) {
+						lastStartTime = tmpTI.getStart();
+					}
+				}
+				if (tmpTE.getTask().getAbsoluteDeadline(lastStartTime) < newSysTime) {
+					return new Schedule(schedule, tmpTE.getTask());
+				}
 			}
 			// If a task becomes available while executing this task,
 			// add the new task(s) to the queue
@@ -104,7 +114,10 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 			sysTime = newSysTime;
 		}
 
-		return new Schedule(schedule, sysTime <= lcm);
+		if (sysTime <= lcm) {
+			return new Schedule(schedule);
+		}
+		return new Schedule(schedule, schedule.get(schedule.size() - 1).getTask());
 	}
 
 }

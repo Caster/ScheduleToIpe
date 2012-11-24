@@ -18,14 +18,15 @@ public class Schedule {
 	private final Set<Task> tasks;
 	private final List<TaskInstance> taskSchedule;
 	private final boolean isFeasible;
+	private final Task taskThatMissedDeadline;
 	
 	/**
-	 * Constructs a new Schedule from a given list of TaskInstances and Tasks.
+	 * Constructs a new Schedule from a given list of TaskInstances and Tasks,
+	 * where the schedule is feasible.
 	 * 
 	 * @param sSchedule The schedule for the Tasks.
-	 * @param sIsFeasible If this schedule is a schedule without deadline miss.
 	 */
-	public Schedule (List<TaskInstance> sSchedule, boolean sIsFeasible) {
+	public Schedule (List<TaskInstance> sSchedule) {
 		// using unmodifiables to guarantee immutability.
 		ArrayList<TaskInstance> sScheduleArrayList = new ArrayList<TaskInstance>(sSchedule);
 		Collections.sort(sScheduleArrayList); // sort taskinstances on start-time
@@ -38,7 +39,33 @@ public class Schedule {
 			}
 		}
 		this.tasks = Collections.unmodifiableSet(sTasks);
-		this.isFeasible = sIsFeasible;
+		this.isFeasible = true;
+		this.taskThatMissedDeadline = null;
+	}
+	
+	/**
+	 * Constructs a new Schedule from a given list of TaskInstances and Tasks,
+	 * where the schedule is not feasible and the given task has missed its
+	 * deadline.
+	 * 
+	 * @param sSchedule The schedule for the Tasks.
+	 * @param sMissedDeadline The task that missed its deadline.
+	 */
+	public Schedule (List<TaskInstance> sSchedule, Task sMissedDeadline) {
+		// using unmodifiables to guarantee immutability.
+		ArrayList<TaskInstance> sScheduleArrayList = new ArrayList<TaskInstance>(sSchedule);
+		Collections.sort(sScheduleArrayList); // sort taskinstances on start-time
+		taskSchedule = Collections.unmodifiableList(sScheduleArrayList);
+		// build up set of tasks in schedule
+		HashSet<Task> sTasks = new HashSet<Task>();
+		for (TaskInstance ti : sSchedule) {
+			if (!sTasks.contains(ti.getTask())) {
+				sTasks.add(ti.getTask());
+			}
+		}
+		this.tasks = Collections.unmodifiableSet(sTasks);
+		this.isFeasible = false;
+		this.taskThatMissedDeadline = sMissedDeadline;
 	}
 	
 	/**
@@ -49,6 +76,23 @@ public class Schedule {
 	public TaskInstance getLastTaskInstance() {
 		TaskInstance[] taskInstances = taskSchedule.toArray(new TaskInstance[] {});
 		return taskInstances[taskInstances.length - 1];
+	}
+	
+	/**
+	 * Return the last instance of the task that missed its deadline.
+	 * 
+	 * @return Last instance of the task that missed its deadline.
+	 *         {@code null} if no such task exists in this schedule.
+	 */
+	public TaskInstance getMissedTaskLastInstance() {
+		if (isFeasible)  return null;
+		TaskInstance[] taskInstances = taskSchedule.toArray(new TaskInstance[] {});
+		for (int i = taskInstances.length - 1; i >= 0; i--) {
+			if (taskInstances[i].getTask().equals(taskThatMissedDeadline)) {
+				return taskInstances[i];
+			}
+		}
+		return null;
 	}
 	
 	/**

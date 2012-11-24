@@ -123,7 +123,7 @@ public class OutputIpe {
 		
 		// Draw deadline miss, if any
 		if (!schedule.isFeasible()) {
-			TaskInstance lastTaskInstance = schedule.getLastTaskInstance();
+			TaskInstance lastTaskInstance = schedule.getMissedTaskLastInstance();
 			j = 0;
 			for (Task tt : tasks) {
 				if (tt.equals(lastTaskInstance.getTask()))  break;
