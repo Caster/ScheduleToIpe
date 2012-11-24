@@ -57,10 +57,10 @@ public class OutputIpe {
 	public static final int GRID_SIZE = 16;
 	/** Offset for graph in Ipe file, over X-axis.
 	 *  This is the X-coordinate of the upper-left corner of the drawing. */
-	public static final int OFFSET_X = 16 + 10 * GRID_SIZE;
+	public static final int OFFSET_X = 16 + 7 * GRID_SIZE;
 	/** Offset for graph in Ipe file, over Y-axis.
 	 *  This is the Y-coordinate of the upper-left corner of the drawing. */
-	public static final int OFFSET_Y = 832 - 5 * GRID_SIZE;
+	public static final int OFFSET_Y = 832 - 4 * GRID_SIZE;
 	/** Padding, used in drawing squares. */
 	public static final double PADDING = 0.5;
 	/** Space around text. */
