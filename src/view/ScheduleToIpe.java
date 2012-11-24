@@ -25,8 +25,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import model.Task;
-import model.scheduleralgorithms.EarliestDeadlineFirst;
-import model.scheduleralgorithms.RateMonotonic;
+import model.scheduleralgorithms.DeadlineMonotonic;
 import output.OutputIpe;
 
 /**
@@ -144,12 +143,18 @@ public class ScheduleToIpe extends JFrame {
 	ActionListener exportScheduleButtonListener = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			// EDF
 //			EarliestDeadlineFirst edf = new EarliestDeadlineFirst();
 //			outputIpe.outputIpeFile(edf.createSchedule(createdTasks));
 //			System.out.println(edf.createSchedule(createdTasks));
-			RateMonotonic rm = new RateMonotonic();
-			outputIpe.outputIpeFile(rm.createSchedule(createdTasks));
-			System.out.println(rm.createSchedule(createdTasks));
+			// RM
+//			RateMonotonic rm = new RateMonotonic();
+//			outputIpe.outputIpeFile(rm.createSchedule(createdTasks));
+//			System.out.println(rm.createSchedule(createdTasks));
+			// DM
+			DeadlineMonotonic dm = new DeadlineMonotonic();
+			outputIpe.outputIpeFile(dm.createSchedule(createdTasks));
+			System.out.println(dm.createSchedule(createdTasks));
 		}
 	};
 	/** Input with name of task that is currenlty edited. */
