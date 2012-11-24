@@ -91,8 +91,9 @@ public class OutputIpe {
 	 * depending on how this object was constructed.
 	 * 
 	 * @param schedule The schedule to be outputted.
+	 * @param outputIpeOptions Options for output.
 	 */
-	public void outputIpeFile(Schedule schedule) {
+	public void outputIpeFile(Schedule schedule, OutputIpeOptions outputIpeOptions) {
 		if (outFile != null) {
 			try {
 				output = new PrintStream(new FileOutputStream(outFile));
@@ -196,6 +197,9 @@ public class OutputIpe {
 		
 		// Ipe footer
 		outputFooter();
+		
+		// Close stream
+		if (output != System.out)  output.close();
 	}
 	
 	private void outputFromFile(String path) {

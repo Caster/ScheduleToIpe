@@ -155,8 +155,8 @@ public class ScheduleToIpe extends JFrame {
 								)
 						)
 				);
-			outputIpe.outputIpeFile(schedule);
-			//System.out.println(schedule);
+			IpeOutputOptionFrame ioof = new IpeOutputOptionFrame(ScheduleToIpe.this, outputIpe, schedule);
+			ioof.setVisible(true);
 		}
 	};
 	/** Input with name of task that is currenlty edited. */
@@ -204,6 +204,7 @@ public class ScheduleToIpe extends JFrame {
 		
 		setTitle("ScheduleToIpe");
 		setSize(new Dimension(800, 600));
+		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new GridLayout());
 		
