@@ -193,8 +193,8 @@ public class OutputIpe {
 		}
 
 		// write Y-axis task names
-		String taskPrefix = options.getStringOption("xAxisPreLabelText");
-		String taskPostfix = options.getStringOption("xAxisPostLabelText");
+		String taskPrefix = options.getStringOption("yAxisPreLabelText");
+		String taskPostfix = options.getStringOption("yAxisPostLabelText");
 		
 		// looping over the tasks
 		j = 0;
