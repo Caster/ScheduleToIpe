@@ -178,10 +178,10 @@ public class OutputIpe {
 			String postfix = options.getStringOption("xAxisPostLabelText");
 			
 			// writing the numbers
-			int stepSize = xAxisNumbering < 0? 1: (schedule.getLcm() / xAxisNumbering);
+			int stepSize = xAxisNumbering < 0 ? 1 : (schedule.getLcm() / (xAxisNumbering - 1));
 			int maxOption = options.getIntegerOption("scheduleMaxLength");
-			int until = maxOption == 0? schedule.getLcm(): maxOption;
-			for (i = 0; i < until; i += stepSize) {
+			int until = maxOption == 0 ? schedule.getLcm() : maxOption;
+			for (i = 0; i <= until; i += stepSize) {
 				writeString(prefix + i + postfix, OFFSET_X
 						+ GRID_SIZE * i, OFFSET_Y - GRID_SIZE * tasks.size()
 						- TEXT_MARGIN, "center", "top");
