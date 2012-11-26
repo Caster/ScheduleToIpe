@@ -138,27 +138,43 @@ public class OutputIpe {
 			}
 			if (options.getBooleanOption("fill")) {
 				fillColor = lineColor;
+				writeSquareFilled(
+						OFFSET_X
+								+ GRID_SIZE
+								* curTaskInstance.getStart()
+								+ (prevTaskInstance != null
+										&& curTaskInstance.getTask().equals(
+												prevTaskInstance.getTask()) ? -PADDING
+										: PADDING),
+						OFFSET_Y + GRID_SIZE * (j - tasks.size()) + PADDING,
+						GRID_SIZE
+								* (curTaskInstance.getEnd() - curTaskInstance
+										.getStart())
+								- (prevTaskInstance != null
+										&& curTaskInstance.getTask().equals(
+												prevTaskInstance.getTask()) ? 0
+										: 2 * PADDING), GRID_SIZE - 2 * PADDING,
+						lineColor, fillColor);
 			} else {
-				fillColor = "white";
+				writeSquare(
+						OFFSET_X
+								+ GRID_SIZE
+								* curTaskInstance.getStart()
+								+ (prevTaskInstance != null
+										&& curTaskInstance.getTask().equals(
+												prevTaskInstance.getTask()) ? -PADDING
+										: PADDING),
+						OFFSET_Y + GRID_SIZE * (j - tasks.size()) + PADDING,
+						GRID_SIZE
+								* (curTaskInstance.getEnd() - curTaskInstance
+										.getStart())
+								- (prevTaskInstance != null
+										&& curTaskInstance.getTask().equals(
+												prevTaskInstance.getTask()) ? 0
+										: 2 * PADDING), GRID_SIZE - 2 * PADDING,
+						lineColor, "");
 			}
 
-			writeSquareFilled(
-					OFFSET_X
-							+ GRID_SIZE
-							* curTaskInstance.getStart()
-							+ (prevTaskInstance != null
-									&& curTaskInstance.getTask().equals(
-											prevTaskInstance.getTask()) ? -PADDING
-									: PADDING),
-					OFFSET_Y + GRID_SIZE * (j - tasks.size()) + PADDING,
-					GRID_SIZE
-							* (curTaskInstance.getEnd() - curTaskInstance
-									.getStart())
-							- (prevTaskInstance != null
-									&& curTaskInstance.getTask().equals(
-											prevTaskInstance.getTask()) ? 0
-									: 2 * PADDING), GRID_SIZE - 2 * PADDING,
-					lineColor, fillColor);
 			prevTaskInstance = curTaskInstance;
 			time = curTaskInstance.getEnd();
 		}
