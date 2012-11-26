@@ -110,9 +110,13 @@ public class OutputIpe {
 		// Ipe header
 		outputHeader();
 
+		// Up to where should we draw the schedule..?
+		int maxOption = options.getIntegerOption("scheduleMaxLength");
+		int until = maxOption == 0 ? schedule.getLcm() : maxOption;
+		
 		// Draw tasks
 		double time = 0;
-		while (time < schedule.getLcm()) {
+		while (time < until) {
 			curTaskInstance = schedule.getTaskInstanceAt(time);
 			if (curTaskInstance == null) {
 				if (schedule.getNextTaskAt(time) == null)
@@ -128,6 +132,11 @@ public class OutputIpe {
 				j++;
 			}
 
+			// make sure we do not draw too much
+			if (curTaskInstance.getEnd() > until) {
+				curTaskInstance.setEnd(until);
+			}
+			
 			// deciding the colors based on the options
 			String lineColor;
 			String fillColor;
@@ -181,7 +190,7 @@ public class OutputIpe {
 
 		// Draw axis
 		writeLine(OFFSET_X, OFFSET_Y - GRID_SIZE * tasks.size(), OFFSET_X
-				+ GRID_SIZE * schedule.getLcm(),
+				+ GRID_SIZE * until,
 				OFFSET_Y - GRID_SIZE * tasks.size(), "black", null);
 		writeLine(OFFSET_X, OFFSET_Y, OFFSET_X,
 				OFFSET_Y - GRID_SIZE * tasks.size(), "black", null);
@@ -194,19 +203,13 @@ public class OutputIpe {
 			String postfix = options.getStringOption("xAxisPostLabelText");
 			
 			// writing the numbers
-			double stepSize = xAxisNumbering < 0 ? 1 : ((double) schedule.getLcm() / (xAxisNumbering - 1));
-			int maxOption = options.getIntegerOption("scheduleMaxLength");
-			int until = maxOption == 0 ? schedule.getLcm() : maxOption;
+			double stepSize = xAxisNumbering < 0 ? 1 : ((double) until / (xAxisNumbering - 1));
 			for (double i = 0; i <= until; i += stepSize) {
-				int writeAt = (int) Math.ceil(i);
+				int writeAt = (int) Math.round(i);
 				writeString(prefix + writeAt + postfix, OFFSET_X
 						+ GRID_SIZE * writeAt, OFFSET_Y - GRID_SIZE * tasks.size()
 						- TEXT_MARGIN, "center", "top");
 			}
-			// always draw the last
-			writeString(prefix + until + postfix, OFFSET_X
-					+ GRID_SIZE * until, OFFSET_Y - GRID_SIZE * tasks.size()
-					- TEXT_MARGIN, "center", "top");
 		}
 
 		// write Y-axis task names
@@ -235,23 +238,26 @@ public class OutputIpe {
 					break;
 				j++;
 			}
-			writeSquare(
-					OFFSET_X + GRID_SIZE * lastTaskInstance.getStart(),
-					OFFSET_Y + GRID_SIZE * (j - tasks.size()),
-					GRID_SIZE
-							* (lastTaskInstance.getEnd() - lastTaskInstance
-									.getStart()), GRID_SIZE, "black", "dashed");
-			writeLine(
-					OFFSET_X
-							+ GRID_SIZE
-							* lastTaskInstance.getTask().getAbsoluteDeadline(
-									lastTaskInstance.getStart()),
-					OFFSET_Y - GRID_SIZE * tasks.size(),
-					OFFSET_X
-							+ GRID_SIZE
-							* lastTaskInstance.getTask().getAbsoluteDeadline(
-									lastTaskInstance.getStart()), OFFSET_Y
-							+ GRID_SIZE, "black", "dashed");
+			// only draw deadlinemiss if it falls in interval that is drawn
+			if (lastTaskInstance.getTask().getAbsoluteDeadline(lastTaskInstance.getStart()) <= until) {
+				writeSquare(
+						OFFSET_X + GRID_SIZE * lastTaskInstance.getStart(),
+						OFFSET_Y + GRID_SIZE * (j - tasks.size()),
+						GRID_SIZE
+								* (lastTaskInstance.getEnd() - lastTaskInstance
+										.getStart()), GRID_SIZE, "black", "dashed");
+				writeLine(
+						OFFSET_X
+								+ GRID_SIZE
+								* lastTaskInstance.getTask().getAbsoluteDeadline(
+										lastTaskInstance.getStart()),
+						OFFSET_Y - GRID_SIZE * tasks.size(),
+						OFFSET_X
+								+ GRID_SIZE
+								* lastTaskInstance.getTask().getAbsoluteDeadline(
+										lastTaskInstance.getStart()), OFFSET_Y
+								+ GRID_SIZE, "black", "dashed");
+			}
 		}
 		
 		
