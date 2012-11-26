@@ -2,7 +2,9 @@ package output;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Class that holds options for outputting to an Ipe file.
@@ -117,5 +119,17 @@ public class OutputIpeOptions {
 		if (options.containsKey(key)) {
 			options.setProperty(key, value);
 		}
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("OutputIpeOptions [\n");
+		Set<Entry<Object, Object>> map = options.entrySet();
+		for (Entry<Object, Object> entry : map) {
+			sb.append("  " + entry.getKey().toString() + " = \"" + entry.getValue().toString() + "\",\n");
+		}
+		sb.append("]");
+		return sb.toString();
 	}
 }

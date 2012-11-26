@@ -59,9 +59,9 @@ public class ScheduleToIpe extends JFrame {
 	/** Panel that contains both a text about no tasks being created and a panel with information. */
 	private JPanel rightPanel;
 	/** List with created tasks. */
-	private JList<String> taskList;
+	private JList taskList;
 	/** Model for list with created tasks. */
-	private DefaultListModel<String> taskListModel;
+	private DefaultListModel taskListModel;
 	/** Listener for list with created tasks. */
 	private ListSelectionListener taskListSelectionListener = new ListSelectionListener() {
 		@Override
@@ -82,6 +82,7 @@ public class ScheduleToIpe extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			// Ask for task name
 			String name = JOptionPane.showInputDialog(ScheduleToIpe.this, "Enter a unique name for the task to be created.");
+			if (name == null)  return; // cancel?
 			// Check name
 			if (name.length() == 0) {
 				JOptionPane.showMessageDialog(ScheduleToIpe.this, "A task should have a name of at least one character.",
@@ -150,9 +151,9 @@ public class ScheduleToIpe extends JFrame {
 			Schedule schedule = SupportedSchedulers.createSchedule(
 					createdTasks,
 					SUPPORTED_SCHEDULING_ALGORITHMS.valueOf(
-							inputTaskSchedulingAlgorithm.getItemAt(
+							String.valueOf(inputTaskSchedulingAlgorithm.getItemAt(
 									inputTaskSchedulingAlgorithm.getSelectedIndex()
-								)
+								))
 						)
 				);
 			IpeOutputOptionFrame ioof = new IpeOutputOptionFrame(ScheduleToIpe.this, outputIpe, schedule);
@@ -168,7 +169,7 @@ public class ScheduleToIpe extends JFrame {
 	/** Input with execution time of task that is currenlty edited. */
 	private JTextField inputTaskExecutionTime;
 	/** Dropdown select with available algorithms. */
-	private JComboBox<String> inputTaskSchedulingAlgorithm;
+	private JComboBox inputTaskSchedulingAlgorithm;
 	
 	/** Tasks created by the user. */
 	Set<Task> createdTasks;
@@ -212,9 +213,9 @@ public class ScheduleToIpe extends JFrame {
 		JPanel leftPanel = new JPanel();
 		leftPanel.setLayout(new BorderLayout());
 		// list of created tasks
-		taskListModel = new DefaultListModel<String>();
+		taskListModel = new DefaultListModel();
 		taskListModel.addElement(NO_TASKS_TEXT);
-		taskList = new JList<String>(taskListModel);
+		taskList = new JList(taskListModel);
 		taskList.addListSelectionListener(taskListSelectionListener);
 		leftPanel.add(new JScrollPane(taskList), BorderLayout.CENTER);
 		// buttons to create and delete tasks
@@ -228,7 +229,7 @@ public class ScheduleToIpe extends JFrame {
 		removeTaskButton.setEnabled(false);
 		controlPanel.add(removeTaskButton);
 		JPanel exportPanel = new JPanel(new BorderLayout());
-		inputTaskSchedulingAlgorithm = new JComboBox<String>();
+		inputTaskSchedulingAlgorithm = new JComboBox();
 		for (SUPPORTED_SCHEDULING_ALGORITHMS algorithm : SUPPORTED_SCHEDULING_ALGORITHMS.values()) {
 			inputTaskSchedulingAlgorithm.addItem(algorithm.toString());
 		}
@@ -304,13 +305,13 @@ public class ScheduleToIpe extends JFrame {
 	/**
 	 * Show information about a given task.
 	 * 
-	 * @param taskName Name of the task.
+	 * @param object Name of the task.
 	 */
-	private void showInfoAbout(String taskName) {
+	private void showInfoAbout(Object object) {
 		((CardLayout) rightPanel.getLayout()).show(rightPanel, CARD_TASK_INFO_PANEL);
 		Task t = null;
 		for (Task tt : createdTasks) {
-			if (tt.getName().equals(taskName)) {
+			if (tt.getName().equals(object)) {
 				t = tt;
 				break;
 			}
