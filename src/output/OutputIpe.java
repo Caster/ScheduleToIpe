@@ -112,7 +112,17 @@ public class OutputIpe {
 
 		// Up to where should we draw the schedule..?
 		int maxOption = options.getIntegerOption("scheduleMaxLength");
-		int until = maxOption == 0 ? schedule.getLcm() : maxOption;
+		int until = maxOption;
+		if (maxOption == -1) {
+			if (schedule.isFeasible()) {
+				until = schedule.getLcm();
+			} else {
+				TaskInstance lastTaskInstance = schedule.getMissedTaskLastInstance();
+				until = lastTaskInstance.getTask().getAbsoluteDeadline(lastTaskInstance.getStart());
+			}
+		} else if (maxOption == 0) {
+			until = schedule.getLcm();
+		}
 		
 		// Draw tasks
 		double time = 0;

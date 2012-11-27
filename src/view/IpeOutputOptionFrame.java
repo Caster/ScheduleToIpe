@@ -92,6 +92,11 @@ public class IpeOutputOptionFrame extends JFrame {
 	/** Input with schedule maximum length. */
 	private JTextField scheduleMaxLengthInput;
 	/** RadioButton in group of scheduleMaxLength option:
+	 *  indicates the user wants to use the minimum of first deadline miss
+	 *  and LCM for the schedule length.
+	 */
+	private JRadioButton scheduleMaxLengthDeadlineMissInput;
+	/** RadioButton in group of scheduleMaxLength option:
 	 *  indicates the user wants to use the LCM for the schedule length.
 	 */
 	private JRadioButton scheduleMaxLengthLcmInput;
@@ -100,13 +105,15 @@ public class IpeOutputOptionFrame extends JFrame {
 	 */
 	private JRadioButton scheduleMaxLengthCustomInput;
 	/** Listener making sure only one radiobutton at a time is selected.
-	 *  Will also update value in OIO in one out of two cases.
+	 *  Will also update value in OIO in two out of three cases.
 	 */
 	private ActionListener scheduleMaxLengthListener = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() != scheduleMaxLengthDeadlineMissInput)  scheduleMaxLengthDeadlineMissInput.setSelected(false);
 			if (e.getSource() != scheduleMaxLengthLcmInput)  scheduleMaxLengthLcmInput.setSelected(false);
 			if (e.getSource() != scheduleMaxLengthCustomInput)  scheduleMaxLengthCustomInput.setSelected(false);
+			if (e.getSource() == scheduleMaxLengthDeadlineMissInput)  oio.setOption("scheduleMaxLength", -1);
 			if (e.getSource() == scheduleMaxLengthLcmInput)  oio.setOption("scheduleMaxLength", 0);
 		}
 	};
@@ -227,8 +234,12 @@ public class IpeOutputOptionFrame extends JFrame {
 		JPanel miscOptionsPanel = new JPanel();
 		miscOptionsPanel.setLayout(new BoxLayout(miscOptionsPanel, BoxLayout.PAGE_AXIS));
 		miscOptionsPanel.setBorder(BorderFactory.createTitledBorder("Miscellaneous options"));
-		JPanel scheduleMaxLengthPanel = new JPanel(new GridLayout(3, 2));
+		JPanel scheduleMaxLengthPanel = new JPanel(new GridLayout(4, 2));		
 		scheduleMaxLengthPanel.add(new JLabel("Maximum length of the schedule"));
+		scheduleMaxLengthDeadlineMissInput = new JRadioButton("First deadline miss", oio.getIntegerOption("scheduleMaxLength") == -1);
+		scheduleMaxLengthDeadlineMissInput.addActionListener(scheduleMaxLengthListener);
+		scheduleMaxLengthPanel.add(scheduleMaxLengthDeadlineMissInput);
+		scheduleMaxLengthPanel.add(new JPanel());
 		scheduleMaxLengthLcmInput = new JRadioButton("LCM", oio.getIntegerOption("scheduleMaxLength") == 0);
 		scheduleMaxLengthLcmInput.addActionListener(scheduleMaxLengthListener);
 		scheduleMaxLengthPanel.add(scheduleMaxLengthLcmInput);
