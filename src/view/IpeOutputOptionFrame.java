@@ -135,7 +135,7 @@ public class IpeOutputOptionFrame extends JFrame {
 		
 		// Some initialization
 		setTitle("ScheduleToIpe - Choose options for output");
-		setSize(new Dimension(600, 400));
+		setSize(new Dimension(600, 600));
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowListener() {
@@ -164,10 +164,8 @@ public class IpeOutputOptionFrame extends JFrame {
 			@Override
 			public void windowActivated(WindowEvent e) { /* ignored */ }
 		});
-		setLayout(new BorderLayout());
 		
 		// OPTIONS
-		JPanel formOuterPanel = new JPanel(new BorderLayout());
 		JPanel formPanel = new JPanel();
 		formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.PAGE_AXIS));
 		
@@ -244,21 +242,18 @@ public class IpeOutputOptionFrame extends JFrame {
 		scheduleMaxLengthLcmInput.addActionListener(scheduleMaxLengthListener);
 		scheduleMaxLengthPanel.add(scheduleMaxLengthLcmInput);
 		scheduleMaxLengthPanel.add(new JPanel());
-		scheduleMaxLengthCustomInput = new JRadioButton("Custom value...", oio.getIntegerOption("scheduleMaxLength") != 0);
+		scheduleMaxLengthCustomInput = new JRadioButton("Custom value...", oio.getIntegerOption("scheduleMaxLength") > 0);
 		scheduleMaxLengthCustomInput.addActionListener(scheduleMaxLengthListener);
 		scheduleMaxLengthPanel.add(scheduleMaxLengthCustomInput);
 		scheduleMaxLengthPanel.add(new JPanel());
 		scheduleMaxLengthInput = new JTextField(
-				oio.getIntegerOption("scheduleMaxLength") == 0
+				oio.getIntegerOption("scheduleMaxLength") <= 0
 					? String.valueOf(schedule.getLcm())
 					: String.valueOf(oio.getIntegerOption("scheduleMaxLength"))
 			);
 		scheduleMaxLengthPanel.add(scheduleMaxLengthInput);
 		miscOptionsPanel.add(scheduleMaxLengthPanel);
 		formPanel.add(miscOptionsPanel);
-		
-		formOuterPanel.add(formPanel, BorderLayout.NORTH);
-		add(new JScrollPane(formOuterPanel), BorderLayout.CENTER);
 		
 		// OK/CANCEL
 		JPanel okCancelPanel = new JPanel(new BorderLayout());
@@ -307,7 +302,9 @@ public class IpeOutputOptionFrame extends JFrame {
 		});
 		okCancelInnerPanel.add(okButton);
 		okCancelPanel.add(okCancelInnerPanel, BorderLayout.EAST);
-		add(okCancelPanel, BorderLayout.SOUTH);
+		formPanel.add(okCancelPanel);
+		
+		add(new JScrollPane(formPanel));
 		
 		// Disable parentframe
 		parentFrame.setEnabled(false);
