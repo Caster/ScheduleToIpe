@@ -281,6 +281,7 @@ public class ScheduleToIpe extends JFrame {
 					}
 				}
 				if (t == null)  return;
+				createdTasks.remove(t);
 				if (canChangeName) {
 					String oldName = t.getName();
 					t.setName(inputTaskName.getText());
@@ -292,6 +293,7 @@ public class ScheduleToIpe extends JFrame {
 				t.setPeriod(Integer.valueOf(inputTaskPeriod.getText()));
 				t.setDeadline(Integer.valueOf(inputTaskDeadline.getText()));
 				t.setExecutionTime(Double.valueOf(inputTaskExecutionTime.getText()));
+				createdTasks.add(t);
 			}
 		});
 		saveButtonPanel.add(saveButton, BorderLayout.EAST);
