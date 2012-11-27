@@ -20,6 +20,31 @@ import model.Utils;
  */
 public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 	
+	/** If the priority of every task should be refreshed every tick, or
+	 *  only when a new job is added to the system.
+	 */
+	private boolean updatePriorityEveryTick = false;
+	
+	/**
+	 * Return if the priority of every task is refreshed every tick ({@code true}),
+	 * or only when a new instance is added to the system ({@code false}).
+	 * 
+	 * @return If priority of every task is updated every tick.
+	 */
+	public boolean isPriorityUpdatedEveryTick() {
+		return updatePriorityEveryTick;
+	}
+
+	/**
+	 * Change if the priority is updated every tick (or more, when a task runs
+	 * less than a tick).
+	 * 
+	 * @param updatePriority New value for {@link #isPriorityUpdatedEveryTick()}.
+	 */
+	public void setUpdatePriorityEveryTick(boolean updatePriority) {
+		this.updatePriorityEveryTick = updatePriority;
+	}
+
 	/**
 	 * Assigns a priority to a Task at a given time. A higher priority will
 	 * be scheduled first.
@@ -53,10 +78,17 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 		double newSysTime = 0;
 		TaskExecutionTime te;
 		while (sysTime < lcm) {
-			// TODO: Refresh the priority of all tasks in the queue by calling 'getPriority' again.
-			//       Maybe it should be possible to switch this off, as for example EDF does not
-			//       need it and it is a major performance boost to not do it.
-			
+			// Refresh the priority of all tasks in the queue by calling 'getPriority' again.
+			// Only do this when it is switched on, as it is bad for performance.
+			if (updatePriorityEveryTick) {
+				TaskExecutionTime[] tmpTaskQueueArr = taskQueue.toArray(new TaskExecutionTime[] {});
+				taskQueue.retainAll(new ArrayList<TaskExecutionTime>());
+				for (TaskExecutionTime tmpTE : tmpTaskQueueArr) {
+					tmpTE.getTask().setPriority(getPriority(tmpTE.getTask(), sysTime));
+					taskQueue.add(tmpTE);
+				}
+			}
+				
 			// If the queue is empty, skip to the time when a task becomes available
 			// and add that task to the queue
 			if (taskQueue.isEmpty()) {

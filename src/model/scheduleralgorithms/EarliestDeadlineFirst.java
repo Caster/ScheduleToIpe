@@ -10,7 +10,7 @@ import model.Task;
  * @author Thom Castermans
  */
 public class EarliestDeadlineFirst extends DynamicPriorityScheduler {
-
+	
 	@Override
 	protected int getPriority(Task task, double time) {
 		// calculate absolute deadline and invert this, as the priority is
