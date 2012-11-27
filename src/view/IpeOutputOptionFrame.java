@@ -67,7 +67,7 @@ public class IpeOutputOptionFrame extends JFrame {
 	/** TextField where user can type number of numbers s/he wants along X-axis. */
 	private JTextField axisNumberExactNumberInput;
 	/** Listener making sure only one radiobutton at a time is selected.
-	 *  Will also update value in OIO.
+	 *  Will also update value in OIO in two out of three cases.
 	 */
 	private ActionListener axisNumberListener = new ActionListener() {
 		@Override
@@ -90,11 +90,17 @@ public class IpeOutputOptionFrame extends JFrame {
 	
 	/** Input with schedule maximum length. */
 	private JTextField scheduleMaxLengthInput;
-	/** TODO */
+	/** RadioButton in group of scheduleMaxLength option:
+	 *  indicates the user wants to use the LCM for the schedule length.
+	 */
 	private JRadioButton scheduleMaxLengthLcmInput;
-	/** TODO */
+	/** RadioButton in group of scheduleMaxLength option:
+	 *  indicates the user wants to use a custom value for the schedule length.
+	 */
 	private JRadioButton scheduleMaxLengthCustomInput;
-	/** TODO */
+	/** Listener making sure only one radiobutton at a time is selected.
+	 *  Will also update value in OIO in one out of two cases.
+	 */
 	private ActionListener scheduleMaxLengthListener = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
