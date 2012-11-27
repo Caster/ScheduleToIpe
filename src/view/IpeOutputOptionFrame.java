@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -109,6 +110,9 @@ public class IpeOutputOptionFrame extends JFrame {
 			if (e.getSource() == scheduleMaxLengthLcmInput)  oio.setOption("scheduleMaxLength", 0);
 		}
 	};
+	
+	/** CheckBox that the user can use to cange if Ipe should be opened or not. */
+	private JCheckBox openIpeCheckBox;
 	
 	/**
 	 * Create a new {@link IpeOutputOptionFrame} with given parent.
@@ -248,6 +252,8 @@ public class IpeOutputOptionFrame extends JFrame {
 		// OK/CANCEL
 		JPanel okCancelPanel = new JPanel(new BorderLayout());
 		JPanel okCancelInnerPanel = new JPanel();
+		openIpeCheckBox = new JCheckBox("Open Ipe");
+		okCancelInnerPanel.add(openIpeCheckBox);
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(new ActionListener() {
 			@Override
@@ -275,6 +281,16 @@ public class IpeOutputOptionFrame extends JFrame {
 				//System.out.println(oio);
 				//System.out.println(schedule);
 				oi.outputIpeFile(s, oio);
+				
+				// Make Ipe open the file, if selected by the user
+				if (openIpeCheckBox.isSelected()) {
+					try {
+						Runtime.getRuntime().exec("ipe " + System.getProperty("user.home") + "/out.ipe");
+					} catch (IOException ioe) {
+						ioe.printStackTrace();
+					}
+				}
+				
 				dispose();
 			}
 		});
