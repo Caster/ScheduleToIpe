@@ -1,6 +1,7 @@
 package model.scheduleralgorithms;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
@@ -20,6 +21,9 @@ import model.Utils;
  */
 public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 	
+	/** The set of tasks that is scheduled. */
+	List<Task> tasksToBeScheduled;
+	
 	/**
 	 * Assigns a priority to a Task.
 	 * 
@@ -34,6 +38,8 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 	 * @param tasks The set of tasks to be scheduled.
 	 */
 	public Schedule createSchedule(Set<Task> tasks) {
+		// set tasks
+		this.tasksToBeScheduled = Arrays.asList(tasks.toArray(new Task[] {}));
 		// the cyclus of this task set
 		int lcm = Utils.lcm(tasks);
 
@@ -74,7 +80,7 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 			
 			// Get a task from the queue, let it execute
 			te = taskQueue.peek();
-			newSysTime = sysTime + te.execute(1);
+			newSysTime = sysTime + te.execute(getMaxExecutionTimeAt(te.getTask(), sysTime));
 			if (newSysTime <= lcm) {
 				schedule.add(new TaskInstance(te.getTask(), sysTime, newSysTime));
 			}
@@ -115,6 +121,9 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 			sysTime = newSysTime;
 		}
 
+		// we are not scheduling anymore
+		this.tasksToBeScheduled = null;
+		
 		// if there is still a task to be scheduled, we have a deadline miss per definition
 		if (!taskQueue.isEmpty()) {
 			return new Schedule(schedule, taskQueue.peek().getTask());
@@ -123,4 +132,24 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 		return new Schedule(schedule);
 	}
 
+	/**
+	 * Given the time and tasks that are being scheduled now in
+	 * {@code tasksToBeScheduled}, give the time you can let a
+	 * task execute without missing a task release of other tasks.
+	 * 
+	 * @param runsCurrently Currently running task.
+	 * @param sysTime Current system time.
+	 * @return See description.
+	 */
+	private double getMaxExecutionTimeAt(Task runsCurrently, double sysTime) {
+		double pos1 = 1;
+		double pos2 = Double.MAX_VALUE;
+		for (Task otherTask : tasksToBeScheduled) {
+			if (otherTask.equals(runsCurrently))  continue;
+			
+			double nextReleaseTime = (Math.floor(sysTime / otherTask.getPeriod()) + 1) * otherTask.getPeriod();
+			if (nextReleaseTime - sysTime < pos2)  pos2 = nextReleaseTime - sysTime;
+		}
+		return Math.min(pos1, pos2);
+	}
 }

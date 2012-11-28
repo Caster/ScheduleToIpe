@@ -117,7 +117,7 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 			
 			// Get a task from the queue, let it execute
 			te = taskQueue.peek();
-			newSysTime = sysTime + te.execute(1);
+			newSysTime = sysTime + te.execute(getMaxExecutionTimeAt(te.getTask(), sysTime));
 			schedule.add(new TaskInstance(te.getTask(), sysTime, newSysTime));
 			// Remove the task from the queue if it is done with its execution
 			if (te.getExecutionTimeLeft() == 0) {
@@ -168,4 +168,24 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 		return new Schedule(schedule);
 	}
 
+	/**
+	 * Given the time and tasks that are being scheduled now in
+	 * {@code tasksToBeScheduled}, give the time you can let a
+	 * task execute without missing a task release of other tasks.
+	 * 
+	 * @param runsCurrently Currently running task.
+	 * @param sysTime Current system time.
+	 * @return See description.
+	 */
+	private double getMaxExecutionTimeAt(Task runsCurrently, double sysTime) {
+		double pos1 = 1;
+		double pos2 = Double.MAX_VALUE;
+		for (Task otherTask : tasksToBeScheduled) {
+			if (otherTask.equals(runsCurrently))  continue;
+			
+			double nextReleaseTime = (Math.floor(sysTime / otherTask.getPeriod()) + 1) * otherTask.getPeriod();
+			if (nextReleaseTime - sysTime < pos2)  pos2 = nextReleaseTime - sysTime;
+		}
+		return Math.min(pos1, pos2);
+	}
 }
