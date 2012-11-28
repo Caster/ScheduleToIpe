@@ -115,10 +115,12 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 			sysTime = newSysTime;
 		}
 
-		if (sysTime <= lcm) {
-			return new Schedule(schedule);
+		// if there is still a task to be scheduled, we have a deadline miss per definition
+		if (!taskQueue.isEmpty()) {
+			return new Schedule(schedule, taskQueue.peek().getTask());
 		}
-		return new Schedule(schedule, schedule.get(schedule.size() - 1).getTask());
+		
+		return new Schedule(schedule);
 	}
 
 }

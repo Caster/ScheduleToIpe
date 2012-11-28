@@ -1,6 +1,7 @@
 package model.scheduleralgorithms;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
@@ -24,6 +25,8 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 	 *  only when a new job is added to the system.
 	 */
 	private boolean updatePriorityEveryTick = false;
+	/** The set of tasks that is scheduled. */
+	List<Task> tasksToBeScheduled;
 	
 	/**
 	 * Return if the priority of every task is refreshed every tick ({@code true}),
@@ -61,6 +64,8 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 	 * @param tasks The set of tasks to be scheduled.
 	 */
 	public Schedule createSchedule(Set<Task> tasks) {
+		// set tasks
+		this.tasksToBeScheduled = Arrays.asList(tasks.toArray(new Task[] {}));
 		// the cyclus of this task set
 		int lcm = Utils.lcm(tasks);
 
@@ -152,6 +157,14 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 			sysTime = newSysTime;
 		}
 
+		// we are not scheduling anymore
+		this.tasksToBeScheduled = null;
+
+		// if there is still a task to be scheduled, we have a deadline miss per definition
+		if (!taskQueue.isEmpty()) {
+			return new Schedule(schedule, taskQueue.peek().getTask());
+		}
+		
 		return new Schedule(schedule);
 	}
 

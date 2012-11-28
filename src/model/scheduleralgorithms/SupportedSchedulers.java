@@ -25,7 +25,9 @@ public class SupportedSchedulers {
 		/** Rate Monotonic scheduling algorithm. */
 		RM,
 		/** Earliest Deadline First scheduling algorithm. */
-		EDF
+		EDF,
+		/** Round Robin scheduling algorithm. */
+		RR
 	}
 	
 	private SupportedSchedulers() {
@@ -52,6 +54,9 @@ public class SupportedSchedulers {
 			case EDF :
 				EarliestDeadlineFirst edf = new EarliestDeadlineFirst();
 				return edf.createSchedule(tasks);
+			case RR :
+				RoundRobin rr = new RoundRobin(1);
+				return rr.createSchedule(tasks);
 		}
 		// We should never get here, above switch should always cover all available algorithms
 		return null;

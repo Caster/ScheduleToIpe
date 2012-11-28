@@ -8,7 +8,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.DefaultListModel;
@@ -230,7 +234,14 @@ public class ScheduleToIpe extends JFrame {
 		controlPanel.add(removeTaskButton);
 		JPanel exportPanel = new JPanel(new BorderLayout());
 		inputTaskSchedulingAlgorithm = new JComboBox();
-		for (SUPPORTED_SCHEDULING_ALGORITHMS algorithm : SUPPORTED_SCHEDULING_ALGORITHMS.values()) {
+		List<SUPPORTED_SCHEDULING_ALGORITHMS> algs = Arrays.asList(SUPPORTED_SCHEDULING_ALGORITHMS.values());
+		Collections.sort(algs, new Comparator<SUPPORTED_SCHEDULING_ALGORITHMS>() {
+			@Override
+			public int compare(SUPPORTED_SCHEDULING_ALGORITHMS o1, SUPPORTED_SCHEDULING_ALGORITHMS o2) {
+				return o1.toString().compareTo(o2.toString());
+			}
+		});
+		for (SUPPORTED_SCHEDULING_ALGORITHMS algorithm : algs) {
 			inputTaskSchedulingAlgorithm.addItem(algorithm.toString());
 		}
 		exportPanel.add(inputTaskSchedulingAlgorithm, BorderLayout.WEST);
