@@ -138,7 +138,6 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 			return new Schedule(schedule, taskQueue.peek().getTask());
 		}
 		
-		System.out.println(schedule);
 		return new Schedule(schedule);
 	}
 
