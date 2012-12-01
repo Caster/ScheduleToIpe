@@ -110,8 +110,19 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 				// No task available until the end? Quit then.
 				if (minStartTask == null)  break;
 				
+				// Add other tasks to the queue that start at that start time
+				// If we do not do this, tasks will not be added
+				for (Task t : tasks) {
+					double nextExecution = sysTime - (sysTime % t.getPeriod()) + t.getPeriod();
+					if (nextExecution == minStartTime) {
+						t.setPriority(getPriority(t, newSysTime));
+						taskQueue.add(new TaskExecutionTime(t));
+					}
+				}
+				
 				// Skip to task, jaj.
 				sysTime = minStartTime;
+				minStartTask.setPriority(getPriority(minStartTask, newSysTime));
 				taskQueue.add(new TaskExecutionTime(minStartTask));
 			}
 			

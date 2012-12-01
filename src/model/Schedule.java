@@ -72,7 +72,8 @@ public class Schedule {
 	 */
 	public void compress() {
 		for (int i = taskSchedule.size() - 1; i > 0; i--) {
-			if (taskSchedule.get(i).getTask().equals(taskSchedule.get(i - 1).getTask())) {
+			if (taskSchedule.get(i).getTask().equals(taskSchedule.get(i - 1).getTask()) &&
+					taskSchedule.get(i - 1).getEnd() == taskSchedule.get(i).getStart()) {
 				TaskInstance newTI = new TaskInstance(
 						taskSchedule.get(i).getTask(),
 						taskSchedule.get(i - 1).getStart(),

@@ -73,6 +73,15 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 				// No task available until the end? Quit then.
 				if (minStartTask == null)  break;
 				
+				// Add other tasks to the queue that start at that start time
+				// If we do not do this, tasks will not be added
+				for (Task t : tasks) {
+					double nextExecution = sysTime - (sysTime % t.getPeriod()) + t.getPeriod();
+					if (nextExecution == minStartTime) {
+						taskQueue.add(new TaskExecutionTime(t));
+					}
+				}
+				
 				// Skip to task, jaj.
 				sysTime = minStartTime;
 				taskQueue.add(new TaskExecutionTime(minStartTask));
@@ -129,6 +138,7 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 			return new Schedule(schedule, taskQueue.peek().getTask());
 		}
 		
+		System.out.println(schedule);
 		return new Schedule(schedule);
 	}
 
