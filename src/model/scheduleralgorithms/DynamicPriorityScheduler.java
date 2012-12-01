@@ -180,10 +180,8 @@ public abstract class DynamicPriorityScheduler implements SchedulerAlgorithm {
 	private double getMaxExecutionTimeAt(Task runsCurrently, double sysTime) {
 		double pos1 = 1;
 		double pos2 = Double.MAX_VALUE;
-		for (Task otherTask : tasksToBeScheduled) {
-			if (otherTask.equals(runsCurrently))  continue;
-			
-			double nextReleaseTime = (Math.floor(sysTime / otherTask.getPeriod()) + 1) * otherTask.getPeriod();
+		for (Task task : tasksToBeScheduled) {
+			double nextReleaseTime = (Math.floor(sysTime / task.getPeriod()) + 1) * task.getPeriod();
 			if (nextReleaseTime - sysTime < pos2)  pos2 = nextReleaseTime - sysTime;
 		}
 		return Math.min(pos1, pos2);
