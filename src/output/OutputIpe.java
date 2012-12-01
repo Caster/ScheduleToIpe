@@ -24,7 +24,11 @@ import model.TaskInstance;
 public class OutputIpe {
 
 	/** List of colors supported by Ipe. */
-	public static final String[] IPE_COLORS = { "red", "green", "blue",
+	public static final String[] IPE_COLORS = {
+			// ScheduleToIpe colors
+			"task-red", "task-green", "task-blue", "task-yellow",
+			// Default Ipe colors
+			"red", "green", "blue",
 			"yellow", "orange", "gold", "purple", "gray", "brown", "navy",
 			"pink", "seagreen", "turquoise", "violet", "darkblue", "darkcyan",
 			"darkgray", "darkgreen", "darkmagenta", "darkorange", "darkred",
@@ -151,12 +155,18 @@ public class OutputIpe {
 			String lineColor;
 			String fillColor;
 			if (options.getBooleanOption("useColors")) {
-				lineColor = IPE_COLORS[j % IPE_COLORS.length];
+				fillColor = IPE_COLORS[j % IPE_COLORS.length];
 			} else {
-				lineColor = "black";
+				fillColor = "black";
 			}
+			// Make use of special ScheduleToIpe bordercolors
+			if (fillColor.startsWith("task-")) {
+				lineColor = fillColor + "-border";
+			} else {
+				lineColor = fillColor;
+			}
+			// Actually draw rectangle
 			if (options.getBooleanOption("fill")) {
-				fillColor = lineColor;
 				writeSquareFilled(
 						OFFSET_X
 								+ GRID_SIZE

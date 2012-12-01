@@ -196,6 +196,17 @@ h
 <color name="lightgray" value="0.827"/>
 <color name="lightgreen" value="0.565 0.933 0.565"/>
 <color name="lightyellow" value="1 1 0.878"/>
+
+<!-- ScheduleToIpe colors -->
+<color name="task-red" value="0.882 0.204 0.204"/>
+<color name="task-red-border" value="0.604 0 0"/>
+<color name="task-green" value="0.439 0.824 0.333"/>
+<color name="task-green-border" value="0 0.502 0"/>
+<color name="task-blue" value="0.463 0.525 1"/>
+<color name="task-blue-border" value="0.2 0.169 0.647"/>
+<color name="task-yellow" value="0.945 0.906 0.333"/>
+<color name="task-yellow-border" value="0.816 0.784 0.18"/>
+
 <dashstyle name="dashed" value="[4] 0"/>
 <dashstyle name="dotted" value="[1 3] 0"/>
 <dashstyle name="dash dotted" value="[4 2 1 2] 0"/>
