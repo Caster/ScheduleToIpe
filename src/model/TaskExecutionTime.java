@@ -9,6 +9,9 @@ package model;
  */
 public class TaskExecutionTime implements Comparable<TaskExecutionTime> {
 
+	/** Delta, to be used when checking execution time left. */
+	public static double DELTA = 0.001;
+	
 	/** Task of which the execution time is being kept track of. */
 	private Task t;
 	/** Execution time left for given task. */

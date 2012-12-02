@@ -95,7 +95,7 @@ public abstract class StaticPriorityScheduler implements SchedulerAlgorithm {
 				schedule.add(new TaskInstance(te.getTask(), sysTime, newSysTime));
 			}
 			// Remove the task from the queue if it is done with its execution
-			if (te.getExecutionTimeLeft() == 0) {
+			if (te.getExecutionTimeLeft() < TaskExecutionTime.DELTA) {
 				taskQueue.poll();
 			}
 			// If the deadline is passed after execution of the task,
